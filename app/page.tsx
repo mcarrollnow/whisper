@@ -297,8 +297,13 @@ export default function Home() {
               <p className="text-xs text-dark-text-secondary">End-to-End Encrypted</p>
             </div>
           </div>
-          <div className="text-sm text-dark-text-secondary">
-            {currentUser?.username}
+          <div className="flex flex-col items-end">
+            <div className="text-sm text-dark-text font-medium">
+              {currentUser?.username}
+            </div>
+            <div className="text-xs text-dark-text-secondary">
+              {currentUser?.email}
+            </div>
           </div>
         </div>
       </header>
@@ -308,6 +313,24 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           {messages.length === 0 ? (
             <div className="text-center py-12">
+              <div className="mb-6 p-4 bg-accent-primary/10 border border-accent-primary/20 rounded-lg">
+                <p className="text-dark-text text-sm mb-2">
+                  <strong>📧 Your Email:</strong> {currentUser?.email}
+                </p>
+                <p className="text-dark-text-secondary text-xs">
+                  Share this email with someone so they can message you! Open this app in another browser/window to test.
+                </p>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(currentUser?.email || '')
+                    setError('Email copied to clipboard! ✓')
+                    setTimeout(() => setError(''), 2000)
+                  }}
+                  className="mt-3 px-4 py-2 bg-accent-primary text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Copy My Email
+                </button>
+              </div>
               <div className="w-20 h-20 bg-dark-elevated rounded-full mx-auto mb-4 flex items-center justify-center">
                 <svg className="w-10 h-10 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
