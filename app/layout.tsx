@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Secure messaging app with Signal Protocol encryption',
   manifest: '/manifest.json',
   themeColor: '#0a0a0a',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content',
+  viewport: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover',
 }
 
 export default function RootLayout({

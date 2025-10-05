@@ -92,6 +92,10 @@ html {
   overflow: hidden;
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  zoom: 1;
+  -webkit-user-zoom: fixed;
+  -moz-user-zoom: fixed;
 }
 
 body {
