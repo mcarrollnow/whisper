@@ -131,6 +131,13 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  /* Force no zoom */
+  -webkit-text-size-adjust: 100% !important;
+  -moz-text-size-adjust: 100% !important;
+  -ms-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+  transform: scale(1) !important;
+  transform-origin: 0 0 !important;
 }
 
 /* Ensure scrollable areas contain their scrolling */

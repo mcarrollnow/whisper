@@ -52,6 +52,28 @@ export default function MessagesPage() {
   }, [])
 
   useEffect(() => {
+    // Force reset zoom on mount and viewport changes
+    const resetZoom = () => {
+      if (typeof window !== 'undefined') {
+        const viewport = document.querySelector('meta[name=viewport]')
+        if (viewport) {
+          viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover')
+        }
+        window.scrollTo(0, 0)
+      }
+    }
+
+    resetZoom()
+    window.addEventListener('resize', resetZoom)
+    window.addEventListener('orientationchange', resetZoom)
+
+    return () => {
+      window.removeEventListener('resize', resetZoom)
+      window.removeEventListener('orientationchange', resetZoom)
+    }
+  }, [])
+
+  useEffect(() => {
     if (selectedConversation && currentUser) {
       loadMessages(selectedConversation)
       setupRealtimeSubscription()
@@ -616,12 +638,26 @@ export default function MessagesPage() {
                     setNewMessage(e.target.value)
                     handleTyping()
                   }}
-                  onBlur={() => {
-                    // Reset zoom on iOS when keyboard dismisses
+                  onFocus={() => {
+                    // Prevent zoom on focus
                     if (typeof window !== 'undefined') {
-                      window.scrollTo(0, 0)
-                      document.body.scrollTop = 0
+                      const viewport = document.querySelector('meta[name=viewport]')
+                      if (viewport) {
+                        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+                      }
                     }
+                  }}
+                  onBlur={() => {
+                    // Reset zoom when keyboard dismisses
+                    setTimeout(() => {
+                      if (typeof window !== 'undefined') {
+                        const viewport = document.querySelector('meta[name=viewport]')
+                        if (viewport) {
+                          viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+                        }
+                        window.scrollTo(0, 0)
+                      }
+                    }, 100)
                   }}
                   placeholder="Type a message..."
                   className="flex-1 px-3 lg:px-4 py-2.5 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-base focus:outline-none focus:ring-2 focus:ring-accent-primary"
