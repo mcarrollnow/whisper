@@ -82,11 +82,29 @@ export default function MessagesPage() {
           table: 'messages',
           filter: `or(and(sender_id.eq.${currentUser.id},recipient_id.eq.${selectedConversation}),and(sender_id.eq.${selectedConversation},recipient_id.eq.${currentUser.id}))`
         },
-        (payload) => {
+        async (payload) => {
+          let content = payload.new.ciphertext || ''
+          
+          // Try to decrypt real-time message
+          if (payload.new.session_id && payload.new.mac && currentUser && payload.new.mac !== 'no_encryption') {
+            const session = await getSignalSession(currentUser.id, selectedConversation!)
+            if (session && session.chain_key_recv) {
+              const decrypted = decryptMessage(payload.new.ciphertext, payload.new.mac, session.chain_key_recv)
+              if (decrypted) {
+                content = decrypted.message
+                // Update session with new chain key
+                await updateSession(session.id, { 
+                  chain_key_recv: decrypted.newChainKey,
+                  recv_counter: session.recv_counter + 1
+                })
+              }
+            }
+          }
+          
           const newMessage = {
             id: payload.new.id,
             sender_id: payload.new.sender_id,
-            content: payload.new.ciphertext || '',
+            content,
             created_at: payload.new.created_at,
           }
           setMessages(prev => [...prev, newMessage])
@@ -191,15 +209,19 @@ export default function MessagesPage() {
         const mappedMessages = await Promise.all(data.map(async (msg) => {
           let content = msg.ciphertext || ''
           
-          // Try to decrypt message if we have a session
-          if (msg.session_id && msg.mac) {
+          // Try to decrypt message if we have a session and it's encrypted
+          if (msg.session_id && msg.mac && msg.mac !== 'no_encryption') {
             const session = await getSignalSession(currentUser.id, otherUserId)
-            if (session && session.chain_key_recv) {
-              const decrypted = decryptMessage(msg.ciphertext, msg.mac, session.chain_key_recv)
-              if (decrypted) {
-                content = decrypted.message
-                // Update session with new chain key
-                await updateSession(session.id, { chain_key_recv: decrypted.newChainKey })
+            if (session) {
+              // For received messages, use recv chain key
+              // For sent messages, we already have the plaintext or use send chain key
+              const chainKey = msg.sender_id === currentUser.id ? session.chain_key_send : session.chain_key_recv
+              
+              if (chainKey) {
+                const decrypted = decryptMessage(msg.ciphertext, msg.mac, chainKey)
+                if (decrypted) {
+                  content = decrypted.message
+                }
               }
             }
           }

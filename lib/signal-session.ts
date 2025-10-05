@@ -28,6 +28,7 @@ export async function createSession(
     
     // Initialize Double Ratchet with shared secret as root key
     const rootKey = sharedSecret
+    const initialChainKey = deriveKey(rootKey, 'initial_chain')
     
     const { data, error } = await supabase
       .from('sessions')
@@ -36,6 +37,8 @@ export async function createSession(
         bob_id: bobId,
         session_id: sessionId,
         root_key: rootKey,
+        chain_key_send: initialChainKey,
+        chain_key_recv: initialChainKey,
         send_counter: 0,
         recv_counter: 0,
         prev_counter: 0
