@@ -34,7 +34,7 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-dark-background">
+      <div className="flex items-center justify-center min-h-screen bg-dark-bg">
         <div className="text-center">
           <div className="mb-4">
             <img 
