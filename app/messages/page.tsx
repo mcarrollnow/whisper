@@ -116,6 +116,12 @@ export default function MessagesPage() {
             return
           }
 
+          // Skip messages sent by current user (already added to local state)
+          if (msg.sender_id === currentUser.id) {
+            console.log('⏭️ Skipping own message (already in local state)')
+            return
+          }
+
           console.log('✅ Message is for this conversation!')
           let content = payload.new.ciphertext || ''
 
