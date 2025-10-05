@@ -110,7 +110,7 @@ export default function Home() {
             
             const ciphertext = {
               type: encryptedData.type,
-              body: signalEncryption.base64ToArrayBuffer(encryptedData.body),
+              body: encryptedData.body,
             }
 
             const decryptedContent = await signalEncryption.decryptMessage(
@@ -167,7 +167,7 @@ export default function Home() {
             
             const ciphertext = {
               type: encryptedData.type,
-              body: signalEncryption.base64ToArrayBuffer(encryptedData.body),
+              body: encryptedData.body,
             }
 
             const decryptedContent = await signalEncryption.decryptMessage(
@@ -250,7 +250,7 @@ export default function Home() {
       // Store the encrypted message
       const encryptedContent = JSON.stringify({
         type: ciphertext.type,
-        body: signalEncryption.arrayBufferToBase64(ciphertext.body!),
+        body: ciphertext.body,
       })
 
       const { error } = await supabase.from('messages').insert({

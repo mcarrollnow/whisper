@@ -226,7 +226,7 @@ export class SignalEncryptionService {
   async decryptMessage(
     senderId: string,
     deviceId: number,
-    ciphertext: MessageType
+    ciphertext: { type: number; body: string }
   ): Promise<string> {
     const address = new SignalProtocolAddress(senderId, deviceId)
     const sessionCipher = new SessionCipher(this.store, address)
@@ -235,10 +235,10 @@ export class SignalEncryptionService {
 
     if (ciphertext.type === 3) {
       // PreKeyWhisperMessage - establishes new session
-      plaintextBuffer = await sessionCipher.decryptPreKeyWhisperMessage(ciphertext.body!, 'binary')
+      plaintextBuffer = await sessionCipher.decryptPreKeyWhisperMessage(ciphertext.body, 'binary')
     } else if (ciphertext.type === 1) {
       // WhisperMessage - existing session
-      plaintextBuffer = await sessionCipher.decryptWhisperMessage(ciphertext.body!, 'binary')
+      plaintextBuffer = await sessionCipher.decryptWhisperMessage(ciphertext.body, 'binary')
     } else {
       throw new Error('Unknown message type')
     }
