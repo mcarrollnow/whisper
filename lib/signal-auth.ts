@@ -255,12 +255,27 @@ interface SignalSession {
   expires: number
 }
 
-export function saveSession(user: SignalUser) {
+export async function saveSession(user: SignalUser) {
   const token = generateSecureToken()
   const expires = Date.now() + (24 * 60 * 60 * 1000)
-  
+
   const session: SignalSession = { user, token, expires }
   localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+
+  // Also create Supabase auth session for realtime to work
+  // This uses the user's ID as a custom JWT claim
+  try {
+    await supabase.auth.signInAnonymously({
+      options: {
+        data: {
+          signal_user_id: user.id,
+          signal_username: user.username
+        }
+      }
+    })
+  } catch (error) {
+    console.error('Failed to create Supabase auth session:', error)
+  }
 }
 
 export function getSession(): SignalUser | null {
@@ -281,8 +296,10 @@ export function getSession(): SignalUser | null {
   }
 }
 
-export function clearSession() {
+export async function clearSession() {
   localStorage.removeItem(SESSION_KEY)
+  // Also sign out of Supabase auth
+  await supabase.auth.signOut()
 }
 
 function generateSecureToken(): string {

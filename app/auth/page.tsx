@@ -33,7 +33,7 @@ export default function PrivateAuthPage() {
         if (result.error) {
           setError(result.error)
         } else if (result.user) {
-          saveSession(result.user)
+          await saveSession(result.user)
           router.push('/messages')
         }
       } else {
@@ -48,7 +48,7 @@ export default function PrivateAuthPage() {
         if (result.error) {
           setError(result.error)
         } else if (result.user) {
-          saveSession(result.user)
+          await saveSession(result.user)
           router.push('/messages')
         }
       }
