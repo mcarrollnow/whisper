@@ -421,10 +421,10 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="flex h-screen bg-dark-bg relative overflow-hidden w-full max-w-full">
+    <div className="fixed inset-0 flex bg-dark-bg overflow-hidden">
       {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
@@ -432,17 +432,17 @@ export default function MessagesPage() {
 
       {/* Sidebar */}
       <div className={`
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-        lg:translate-x-0 
-        fixed lg:relative 
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0
+        fixed lg:relative
         w-80 sm:w-80 md:w-96 lg:w-80 xl:w-96
-        bg-dark-surface 
-        border-r border-dark-border 
-        flex flex-col 
+        bg-dark-surface
+        border-r border-dark-border
+        flex flex-col
         z-50 lg:z-auto
         transition-transform duration-300 ease-in-out
-        h-full
-        overflow-y-auto
+        h-full lg:h-auto
+        inset-y-0 lg:inset-y-auto
       `}>
         <div className="flex-shrink-0 p-3 lg:p-4 border-b border-dark-border">
           <div className="flex items-center justify-between mb-3 lg:mb-4">
@@ -536,7 +536,7 @@ export default function MessagesPage() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {selectedConversation ? (
           <>
             {/* Chat Header */}
@@ -562,7 +562,7 @@ export default function MessagesPage() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent overscroll-contain">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent">
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-dark-text-secondary text-sm">
                   No messages yet. Start the conversation!
@@ -607,8 +607,8 @@ export default function MessagesPage() {
             </div>
 
             {/* Message Input */}
-            <div className="flex-shrink-0 p-4 border-t border-dark-border bg-dark-surface" style={{paddingBottom: 'max(16px, env(safe-area-inset-bottom))'}}>
-              <form onSubmit={sendMessage} className="flex gap-2 lg:gap-3">
+            <div className="flex-shrink-0 p-3 lg:p-4 border-t border-dark-border bg-dark-surface">
+              <form onSubmit={sendMessage} className="flex gap-2">
                 <input
                   type="text"
                   value={newMessage}
@@ -617,11 +617,11 @@ export default function MessagesPage() {
                     handleTyping()
                   }}
                   placeholder="Type a message..."
-                  className="flex-1 px-4 py-3 bg-dark-elevated border-2 border-dark-border rounded-full text-dark-text text-base focus:outline-none focus:ring-2 focus:ring-accent-primary focus:border-accent-primary min-h-[44px]"
+                  className="flex-1 px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-sm lg:text-base focus:outline-none focus:ring-2 focus:ring-accent-primary"
                 />
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-base min-h-[44px] min-w-[80px] flex items-center justify-center"
+                  className="px-4 lg:px-6 py-2 lg:py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-sm lg:text-base whitespace-nowrap"
                 >
                   Send
                 </button>
