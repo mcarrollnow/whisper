@@ -25,9 +25,33 @@
   -webkit-overflow-scrolling: touch;
 }
 
-/* Better mobile input handling */
-input[type="text"], textarea {
+/* Better mobile input handling - prevent zoom */
+input[type="text"], textarea, button, select {
   font-size: 16px; /* Prevents zoom on iOS */
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Prevent zoom on double tap */
+* {
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent pinch zoom */
+html {
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}
+
+/* Disable zoom gestures completely */
+body {
+  -webkit-user-zoom: fixed;
+  -moz-user-zoom: fixed;
+  -ms-user-zoom: fixed;
+  user-zoom: fixed;
 }
 
 /* Mobile-friendly scrollbars */
@@ -56,6 +80,13 @@ html, body {
   overflow: hidden;
   position: fixed;
   width: 100%;
+  /* Prevent zoom and ensure perfect app-like scaling */
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 /* Prevent overscroll bounce on iOS */
