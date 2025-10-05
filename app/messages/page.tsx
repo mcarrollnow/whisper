@@ -584,7 +584,7 @@ export default function MessagesPage() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent" style={{ WebkitOverflowScrolling: 'touch' }}>
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-dark-text-secondary text-sm">
                   No messages yet. Start the conversation!
@@ -628,7 +628,7 @@ export default function MessagesPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Message Input */}
+            {/* Message Input - Fixed to bottom */}
             <div className="flex-shrink-0 p-3 lg:p-4 border-t border-dark-border bg-dark-surface">
               <form onSubmit={sendMessage} className="flex gap-2">
                 <input
