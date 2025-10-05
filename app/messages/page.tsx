@@ -76,12 +76,8 @@ export default function MessagesPage() {
   useEffect(() => {
     if (selectedConversation && currentUser) {
       loadMessages(selectedConversation)
-      setupRealtimeSubscription()
-    }
-    
-    return () => {
-      // Cleanup subscriptions when conversation changes
-      supabase.removeAllChannels()
+      const cleanup = setupRealtimeSubscription()
+      return cleanup
     }
   }, [selectedConversation, currentUser])
 
@@ -91,11 +87,13 @@ export default function MessagesPage() {
   }, [messages, typingUsers])
 
   const setupRealtimeSubscription = () => {
-    if (!selectedConversation || !currentUser) return
+    if (!selectedConversation || !currentUser) return () => {}
+
+    console.log('Setting up realtime subscription for conversation:', selectedConversation)
 
     // Subscribe to new messages
     const messageChannel = supabase
-      .channel(`messages-${selectedConversation}`)
+      .channel(`messages-${selectedConversation}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -105,8 +103,9 @@ export default function MessagesPage() {
           filter: `or(and(sender_id.eq.${currentUser.id},recipient_id.eq.${selectedConversation}),and(sender_id.eq.${selectedConversation},recipient_id.eq.${currentUser.id}))`
         },
         async (payload) => {
+          console.log('Received new message:', payload)
           let content = payload.new.ciphertext || ''
-          
+
           // Try to decrypt real-time message
           if (payload.new.session_id && payload.new.mac && currentUser && payload.new.mac !== 'no_encryption') {
             const session = await getSignalSession(currentUser.id, selectedConversation!)
@@ -115,28 +114,31 @@ export default function MessagesPage() {
               if (decrypted) {
                 content = decrypted.message
                 // Update session with new chain key
-                await updateSession(session.id, { 
+                await updateSession(session.id, {
                   chain_key_recv: decrypted.newChainKey,
                   recv_counter: session.recv_counter + 1
                 })
               }
             }
           }
-          
+
           const newMessage = {
             id: payload.new.id,
             sender_id: payload.new.sender_id,
             content,
             created_at: payload.new.created_at,
           }
+          console.log('Adding message to state:', newMessage)
           setMessages(prev => [...prev, newMessage])
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('Message channel subscription status:', status)
+      })
 
     // Subscribe to typing indicators
     const typingChannel = supabase
-      .channel(`typing-${selectedConversation}`)
+      .channel(`typing-${selectedConversation}-${Date.now()}`)
       .on('broadcast', { event: 'typing' }, (payload) => {
         const { user_id, is_typing } = payload.payload
         if (user_id !== currentUser.id) {
@@ -151,7 +153,16 @@ export default function MessagesPage() {
           })
         }
       })
-      .subscribe()
+      .subscribe((status) => {
+        console.log('Typing channel subscription status:', status)
+      })
+
+    // Return cleanup function
+    return () => {
+      console.log('Cleaning up realtime subscriptions')
+      messageChannel.unsubscribe()
+      typingChannel.unsubscribe()
+    }
   }
 
   const checkAuth = async () => {
