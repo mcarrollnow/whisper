@@ -263,21 +263,23 @@ export async function saveSession(user: SignalUser) {
   localStorage.setItem(SESSION_KEY, JSON.stringify(session))
 
   // Also create Supabase auth session for realtime to work
-  // This uses the user's ID as a custom JWT claim
   try {
     console.log('🔐 Creating Supabase auth session for realtime...')
-    const { data, error } = await supabase.auth.signInAnonymously({
-      options: {
-        data: {
-          signal_user_id: user.id,
-          signal_username: user.username
-        }
-      }
-    })
+    const { data, error } = await supabase.auth.signInAnonymously()
+
     if (error) {
       console.error('❌ Failed to create Supabase auth session:', error)
     } else {
       console.log('✅ Supabase auth session created:', data.session?.access_token ? 'Token exists' : 'No token')
+
+      // Store mapping between Supabase auth user and Signal user
+      if (data.user) {
+        await supabase.from('auth_mapping').upsert({
+          supabase_user_id: data.user.id,
+          signal_user_id: user.id
+        })
+        console.log('✅ Auth mapping created')
+      }
     }
   } catch (error) {
     console.error('❌ Exception creating Supabase auth session:', error)
