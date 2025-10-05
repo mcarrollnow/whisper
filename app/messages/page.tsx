@@ -91,9 +91,8 @@ export default function MessagesPage() {
 
     console.log('🔔 Setting up realtime subscription for conversation:', selectedConversation)
     console.log('🔔 Current user:', currentUser.id)
-    console.log('🔔 Filter:', `or(and(sender_id.eq.${currentUser.id},recipient_id.eq.${selectedConversation}),and(sender_id.eq.${selectedConversation},recipient_id.eq.${currentUser.id}))`)
 
-    // Subscribe to new messages
+    // Subscribe to ALL messages - filter in callback
     const messageChannel = supabase
       .channel(`messages-${selectedConversation}-${Date.now()}`)
       .on(
@@ -101,11 +100,23 @@ export default function MessagesPage() {
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'messages',
-          filter: `or(and(sender_id.eq.${currentUser.id},recipient_id.eq.${selectedConversation}),and(sender_id.eq.${selectedConversation},recipient_id.eq.${currentUser.id}))`
+          table: 'messages'
         },
         async (payload) => {
           console.log('📨 Received new message:', payload)
+
+          // Filter messages for this conversation
+          const msg = payload.new
+          const isRelevant =
+            (msg.sender_id === currentUser.id && msg.recipient_id === selectedConversation) ||
+            (msg.sender_id === selectedConversation && msg.recipient_id === currentUser.id)
+
+          if (!isRelevant) {
+            console.log('⏭️ Message not for this conversation, skipping')
+            return
+          }
+
+          console.log('✅ Message is for this conversation!')
           let content = payload.new.ciphertext || ''
 
           // Try to decrypt with shared chain key
