@@ -44,7 +44,7 @@ export default function MessagesPage() {
     if (selectedConversation && currentUser) {
       loadMessages(selectedConversation)
     }
-  }, [selectedConversation])
+  }, [selectedConversation, currentUser])
 
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -113,24 +113,33 @@ export default function MessagesPage() {
   const loadMessages = async (otherUserId: string) => {
     if (!currentUser) return
 
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .or(`sender_id.eq.${currentUser.id}.and.recipient_id.eq.${otherUserId},sender_id.eq.${otherUserId}.and.recipient_id.eq.${currentUser.id}`)
-      .order('created_at', { ascending: true })
+    try {
+      // Use a simpler approach with two separate queries
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`and(sender_id.eq.${currentUser.id},recipient_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},recipient_id.eq.${currentUser.id})`)
+        .order('created_at', { ascending: true })
 
-    if (error) {
-      console.error('Error loading messages:', error)
-      return
-    }
+      if (error) {
+        console.error('Error loading messages:', error)
+        return
+      }
 
-    if (data) {
-      setMessages(data.map(msg => ({
-        id: msg.id,
-        sender_id: msg.sender_id,
-        content: msg.encrypted_content, // Keep encrypted content as-is
-        created_at: msg.created_at,
-      })))
+      if (data && Array.isArray(data)) {
+        const mappedMessages = data.map(msg => ({
+          id: msg.id,
+          sender_id: msg.sender_id,
+          content: msg.encrypted_content || '', // Ensure content is never null
+          created_at: msg.created_at,
+        }))
+        setMessages(mappedMessages)
+      } else {
+        setMessages([])
+      }
+    } catch (err) {
+      console.error('Exception loading messages:', err)
+      setMessages([])
     }
   }
 
@@ -340,22 +349,28 @@ export default function MessagesPage() {
 
             {/* Messages */}
             <div className="flex-1 min-h-0 overflow-y-auto p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.sender_id === currentUser?.id ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-xs lg:max-w-md xl:max-w-lg px-3 lg:px-4 py-2 lg:py-3 rounded-2xl text-sm lg:text-base ${
-                      msg.sender_id === currentUser?.id
-                        ? 'bg-accent-primary text-white'
-                        : 'bg-dark-elevated text-dark-text'
-                    }`}
-                  >
-                    {msg.content}
-                  </div>
+              {messages.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-dark-text-secondary text-sm">
+                  No messages yet. Start the conversation!
                 </div>
-              ))}
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.sender_id === currentUser?.id ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-xs lg:max-w-md xl:max-w-lg px-3 lg:px-4 py-2 lg:py-3 rounded-2xl text-sm lg:text-base ${
+                        msg.sender_id === currentUser?.id
+                          ? 'bg-accent-primary text-white'
+                          : 'bg-dark-elevated text-dark-text'
+                      }`}
+                    >
+                      {msg.content || '[Empty message]'}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Message Input */}
