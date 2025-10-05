@@ -82,26 +82,11 @@ export default function MessagesPage() {
           table: 'messages',
           filter: `or(and(sender_id.eq.${currentUser.id},recipient_id.eq.${selectedConversation}),and(sender_id.eq.${selectedConversation},recipient_id.eq.${currentUser.id}))`
         },
-        async (payload) => {
-          let content = payload.new.ciphertext || ''
-          
-          // Try to decrypt real-time message
-          if (payload.new.session_id && payload.new.mac && currentUser) {
-            const session = await getSignalSession(currentUser.id, selectedConversation!)
-            if (session && session.chain_key_recv) {
-              const decrypted = decryptMessage(payload.new.ciphertext, payload.new.mac, session.chain_key_recv)
-              if (decrypted) {
-                content = decrypted.message
-                // Update session with new chain key
-                await updateSession(session.id, { chain_key_recv: decrypted.newChainKey })
-              }
-            }
-          }
-          
+        (payload) => {
           const newMessage = {
             id: payload.new.id,
             sender_id: payload.new.sender_id,
-            content,
+            content: payload.new.ciphertext || '',
             created_at: payload.new.created_at,
           }
           setMessages(prev => [...prev, newMessage])
