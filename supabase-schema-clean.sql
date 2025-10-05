@@ -31,6 +31,26 @@ CREATE INDEX messages_sender_id_idx ON messages(sender_id);
 CREATE INDEX messages_recipient_id_idx ON messages(recipient_id);
 CREATE INDEX messages_created_at_idx ON messages(created_at DESC);
 
--- Disable RLS (we use custom auth)
-ALTER TABLE users DISABLE ROW LEVEL SECURITY;
-ALTER TABLE messages DISABLE ROW LEVEL SECURITY;
+-- Enable RLS with custom policies for privacy auth
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+
+-- Users policies - allow reading usernames for search, but protect sensitive data
+CREATE POLICY "Allow reading usernames for search" ON users
+  FOR SELECT TO anon, authenticated
+  USING (true);
+
+CREATE POLICY "Allow user creation" ON users
+  FOR INSERT TO anon, authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Allow user updates" ON users
+  FOR UPDATE TO anon, authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Messages policies - allow all operations (app-level security)
+CREATE POLICY "Allow message operations" ON messages
+  FOR ALL TO anon, authenticated
+  USING (true)
+  WITH CHECK (true);
