@@ -415,13 +415,15 @@ export default function MessagesPage() {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
         lg:translate-x-0 
         fixed lg:relative 
-        w-80 sm:w-96 lg:w-80 xl:w-96
+        w-full sm:w-80 md:w-96 lg:w-80 xl:w-96
         bg-dark-surface 
         border-r border-dark-border 
         flex flex-col 
-        z-50 
+        z-50 lg:z-auto
         transition-transform duration-300 ease-in-out
         h-screen
+        safe-area-inset
+        lg:overflow-y-auto
       `}>
         <div className="flex-shrink-0 p-3 lg:p-4 border-b border-dark-border">
           <div className="flex items-center justify-between mb-3 lg:mb-4">
@@ -453,14 +455,14 @@ export default function MessagesPage() {
           <div className="space-y-2">
             <button
               onClick={generateMyInviteCode}
-              className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-accent-primary text-white rounded-lg hover:bg-blue-600 font-medium text-sm lg:text-base"
+              className="w-full px-4 py-3 lg:px-4 lg:py-3 bg-accent-primary text-white rounded-lg hover:bg-blue-600 font-medium text-base lg:text-base touch-manipulation"
             >
               Share Invite Code
             </button>
             
             <button
               onClick={() => setShowAddContactModal(true)}
-              className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border text-dark-text rounded-lg hover:bg-dark-surface font-medium text-sm lg:text-base"
+              className="w-full px-4 py-3 lg:px-4 lg:py-3 bg-dark-elevated border border-dark-border text-dark-text rounded-lg hover:bg-dark-surface font-medium text-base lg:text-base touch-manipulation"
             >
               Add Contact
             </button>
@@ -475,7 +477,7 @@ export default function MessagesPage() {
                   <button
                     key={contact.id}
                     onClick={() => startConversation(contact)}
-                    className="w-full px-3 lg:px-4 py-2 lg:py-3 hover:bg-dark-elevated text-left rounded-lg transition-colors"
+                    className="w-full px-4 py-4 lg:px-4 lg:py-3 hover:bg-dark-elevated text-left rounded-lg transition-colors touch-manipulation"
                   >
                     <div className="font-medium text-dark-text text-sm lg:text-base">{contact.username}</div>
                     <div className="text-xs lg:text-sm text-dark-text-secondary">{contact.display_name || 'Anonymous User'}</div>
@@ -586,8 +588,8 @@ export default function MessagesPage() {
             </div>
 
             {/* Message Input */}
-            <div className="flex-shrink-0 p-3 lg:p-4 border-t border-dark-border bg-dark-surface">
-              <form onSubmit={sendMessage} className="flex gap-2 lg:gap-3">
+            <div className="flex-shrink-0 p-4 lg:p-4 border-t border-dark-border bg-dark-surface safe-area-bottom">
+              <form onSubmit={sendMessage} className="flex items-center space-x-3 lg:space-x-3">
                 <input
                   type="text"
                   value={newMessage}
@@ -596,17 +598,16 @@ export default function MessagesPage() {
                     handleTyping()
                   }}
                   placeholder="Type a message..."
-                  className="flex-1 px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-sm lg:text-base focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                  className="flex-1 px-4 py-3 lg:px-4 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-base lg:text-base focus:outline-none focus:ring-2 focus:ring-accent-primary touch-manipulation"
                 />
                 <button
                   type="submit"
-                  className="px-4 lg:px-6 py-2 lg:py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-sm lg:text-base"
+                  className="px-5 py-3 lg:px-6 lg:py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-base lg:text-base touch-manipulation min-w-[60px]"
                 >
                   Send
                 </button>
               </form>
             </div>
-          </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-dark-text-secondary p-4 lg:p-8">
             <button 
@@ -655,13 +656,13 @@ export default function MessagesPage() {
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowInviteModal(false)}
-                className="flex-1 px-4 py-2 bg-dark-elevated text-dark-text rounded-lg hover:bg-dark-border"
+                className="flex-1 px-4 py-3 bg-dark-elevated text-dark-text rounded-lg hover:bg-dark-border touch-manipulation font-medium"
               >
                 Close
               </button>
               <button
                 onClick={() => navigator.clipboard.writeText(currentInviteCode)}
-                className="flex-1 px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-blue-600"
+                className="flex-1 px-4 py-3 bg-accent-primary text-white rounded-lg hover:bg-blue-600 touch-manipulation font-medium"
               >
                 Copy Code
               </button>
@@ -692,14 +693,14 @@ export default function MessagesPage() {
                   setShowAddContactModal(false)
                   setAddContactCode('')
                 }}
-                className="flex-1 px-4 py-2 bg-dark-elevated text-dark-text rounded-lg hover:bg-dark-border"
+                className="flex-1 px-4 py-3 bg-dark-elevated text-dark-text rounded-lg hover:bg-dark-border touch-manipulation font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddContact}
                 disabled={!addContactCode.trim()}
-                className="flex-1 px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-accent-primary text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation font-medium"
               >
                 Add Contact
               </button>
