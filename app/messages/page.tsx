@@ -384,7 +384,7 @@ export default function MessagesPage() {
     }
 
     // Send encrypted message
-    const { error } = await supabase.from('messages').insert({
+    const { data, error } = await supabase.from('messages').insert({
       sender_id: currentUser.id,
       recipient_id: selectedConversation,
       session_id: session.id,
@@ -392,7 +392,7 @@ export default function MessagesPage() {
       mac,
       message_type: 'message',
       message_counter: session.send_counter + 1
-    })
+    }).select()
 
     if (error) {
       console.error('Error sending message:', error)
@@ -404,8 +404,18 @@ export default function MessagesPage() {
       send_counter: session.send_counter + 1
     })
 
+    // Add the sent message to local state immediately
+    if (data && data[0]) {
+      const sentMessage = {
+        id: data[0].id,
+        sender_id: currentUser.id,
+        content: newMessage, // Use plaintext for sender
+        created_at: data[0].created_at,
+      }
+      setMessages(prev => [...prev, sentMessage])
+    }
+
     setNewMessage('')
-    // Don't reload messages - real-time subscription will handle it
   }
 
   const loadContacts = async (userId: string) => {
