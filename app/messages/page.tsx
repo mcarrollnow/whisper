@@ -413,13 +413,14 @@ export default function MessagesPage() {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
         lg:translate-x-0 
         fixed lg:relative 
-        w-80 sm:w-96 lg:w-80 xl:w-96
+        w-80 sm:w-80 md:w-96 lg:w-80 xl:w-96
         bg-dark-surface 
         border-r border-dark-border 
         flex flex-col 
-        z-50 
+        z-50 lg:z-auto
         transition-transform duration-300 ease-in-out
-        h-screen
+        h-full
+        overflow-y-auto
       `}>
         <div className="flex-shrink-0 p-3 lg:p-4 border-b border-dark-border">
           <div className="flex items-center justify-between mb-3 lg:mb-4">
@@ -513,7 +514,7 @@ export default function MessagesPage() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen">
+      <div className="flex-1 flex flex-col min-w-0 h-full">
         {selectedConversation ? (
           <>
             {/* Chat Header */}
@@ -584,7 +585,7 @@ export default function MessagesPage() {
             </div>
 
             {/* Message Input */}
-            <div className="flex-shrink-0 p-3 lg:p-4 border-t border-dark-border bg-dark-surface">
+            <div className="flex-shrink-0 p-4 border-t border-dark-border bg-dark-surface" style={{paddingBottom: 'max(16px, env(safe-area-inset-bottom))'}}>
               <form onSubmit={sendMessage} className="flex gap-2 lg:gap-3">
                 <input
                   type="text"
@@ -594,11 +595,11 @@ export default function MessagesPage() {
                     handleTyping()
                   }}
                   placeholder="Type a message..."
-                  className="flex-1 px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-sm lg:text-base focus:outline-none focus:ring-1 focus:ring-accent-primary"
+                  className="flex-1 px-4 py-3 bg-dark-elevated border-2 border-dark-border rounded-full text-dark-text text-base focus:outline-none focus:ring-2 focus:ring-accent-primary focus:border-accent-primary min-h-[44px]"
                 />
                 <button
                   type="submit"
-                  className="px-4 lg:px-6 py-2 lg:py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-sm lg:text-base"
+                  className="px-6 py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-base min-h-[44px] min-w-[80px] flex items-center justify-center"
                 >
                   Send
                 </button>
@@ -606,10 +607,10 @@ export default function MessagesPage() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-dark-text-secondary p-4 lg:p-8">
+          <div className="flex-1 flex flex-col items-center justify-center text-dark-text-secondary p-6">
             <button 
               onClick={() => setSidebarOpen(true)}
-              className="mb-3 lg:mb-4 p-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 lg:hidden"
+              className="mb-6 p-4 bg-accent-primary text-white rounded-full hover:bg-blue-600 lg:hidden shadow-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
