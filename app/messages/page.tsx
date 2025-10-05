@@ -450,41 +450,44 @@ export default function MessagesPage() {
             </div>
           </div>
           
-          <button
-            onClick={() => setShowSearch(!showSearch)}
-            className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-accent-primary text-white rounded-lg hover:bg-blue-600 font-medium text-sm lg:text-base"
-          >
-            + New Message
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={generateMyInviteCode}
+              className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-accent-primary text-white rounded-lg hover:bg-blue-600 font-medium text-sm lg:text-base"
+            >
+              Share Invite Code
+            </button>
+            
+            <button
+              onClick={() => setShowAddContactModal(true)}
+              className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border text-dark-text rounded-lg hover:bg-dark-surface font-medium text-sm lg:text-base"
+            >
+              Add Contact
+            </button>
+          </div>
 
-          {showSearch && (
-            <div className="mt-3 lg:mt-4">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value)
-                  searchUsers(e.target.value)
-                }}
-                placeholder="Search users..."
-                className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border rounded-lg text-dark-text text-sm lg:text-base"
-              />
-              {searchResults.length > 0 && (
-                <div className="mt-2 bg-dark-elevated rounded-lg max-h-32 lg:max-h-40 overflow-y-auto">
-                  {searchResults.map((user) => (
-                    <button
-                      key={user.id}
-                      onClick={() => startConversation(user)}
-                      className="w-full px-3 lg:px-4 py-2 lg:py-3 hover:bg-dark-surface text-left border-b border-dark-border last:border-b-0"
-                    >
-                      <div className="font-medium text-dark-text text-sm lg:text-base">{user.username}</div>
-                      <div className="text-xs lg:text-sm text-dark-text-secondary">{user.display_name || 'Anonymous User'}</div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          {/* Contacts List */}
+          <div className="mt-4">
+            <h3 className="text-dark-text font-medium text-sm lg:text-base mb-2">Contacts</h3>
+            {contacts.length > 0 ? (
+              <div className="space-y-1">
+                {contacts.map((contact) => (
+                  <button
+                    key={contact.id}
+                    onClick={() => startConversation(contact)}
+                    className="w-full px-3 lg:px-4 py-2 lg:py-3 hover:bg-dark-elevated text-left rounded-lg transition-colors"
+                  >
+                    <div className="font-medium text-dark-text text-sm lg:text-base">{contact.username}</div>
+                    <div className="text-xs lg:text-sm text-dark-text-secondary">{contact.display_name || 'Anonymous User'}</div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-dark-text-secondary text-sm lg:text-base text-center py-4">
+                No contacts yet. Share your invite code to connect with others.
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent">
@@ -622,12 +625,88 @@ export default function MessagesPage() {
                   className="w-16 h-16 lg:w-20 lg:h-20 mx-auto object-contain opacity-50"
                 />
               </div>
-              <h2 className="text-lg lg:text-xl font-medium text-dark-text mb-2">Welcome to Whisper</h2>
-              <p className="text-dark-text-secondary text-sm lg:text-base">Select a conversation to start messaging</p>
+              <p className="text-sm lg:text-base">Select a contact to start messaging</p>
             </div>
           </div>
-        )}
+        </div>
       </div>
+
+      {/* Invite Code Modal */}
+      {showInviteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-dark-surface rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-dark-text font-bold text-lg mb-4">Share Your Invite Code</h2>
+            <p className="text-dark-text-secondary text-sm mb-4">
+              Share this code with someone to add them as a contact. Code expires in 24 hours.
+            </p>
+            <div className="bg-dark-elevated p-4 rounded-lg mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-mono font-bold text-accent-primary mb-2">
+                  {currentInviteCode}
+                </div>
+                <button
+                  onClick={() => navigator.clipboard.writeText(currentInviteCode)}
+                  className="text-dark-text-secondary hover:text-dark-text text-sm"
+                >
+                  Click to copy
+                </button>
+              </div>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowInviteModal(false)}
+                className="flex-1 px-4 py-2 bg-dark-elevated text-dark-text rounded-lg hover:bg-dark-border"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => navigator.clipboard.writeText(currentInviteCode)}
+                className="flex-1 px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-blue-600"
+              >
+                Copy Code
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Contact Modal */}
+      {showAddContactModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-dark-surface rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-dark-text font-bold text-lg mb-4">Add Contact</h2>
+            <p className="text-dark-text-secondary text-sm mb-4">
+              Enter the invite code someone shared with you to add them as a contact.
+            </p>
+            <input
+              type="text"
+              value={addContactCode}
+              onChange={(e) => setAddContactCode(e.target.value.toUpperCase())}
+              placeholder="Enter invite code..."
+              className="w-full px-4 py-3 bg-dark-elevated border border-dark-border rounded-lg text-dark-text mb-4 font-mono text-center text-lg"
+              maxLength={8}
+            />
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  setShowAddContactModal(false)
+                  setAddContactCode('')
+                }}
+                className="flex-1 px-4 py-2 bg-dark-elevated text-dark-text rounded-lg hover:bg-dark-border"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddContact}
+                disabled={!addContactCode.trim()}
+                className="flex-1 px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add Contact
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
