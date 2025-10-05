@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -35,6 +35,9 @@ export default function MessagesPage() {
   const [showSearch, setShowSearch] = useState(false)
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     checkAuth()
@@ -43,8 +46,65 @@ export default function MessagesPage() {
   useEffect(() => {
     if (selectedConversation && currentUser) {
       loadMessages(selectedConversation)
+      setupRealtimeSubscription()
+    }
+    
+    return () => {
+      // Cleanup subscriptions when conversation changes
+      supabase.removeAllChannels()
     }
   }, [selectedConversation, currentUser])
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages, typingUsers])
+
+  const setupRealtimeSubscription = () => {
+    if (!selectedConversation || !currentUser) return
+
+    // Subscribe to new messages
+    const messageChannel = supabase
+      .channel(`messages-${selectedConversation}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `or(and(sender_id.eq.${currentUser.id},recipient_id.eq.${selectedConversation}),and(sender_id.eq.${selectedConversation},recipient_id.eq.${currentUser.id}))`
+        },
+        (payload) => {
+          const newMessage = {
+            id: payload.new.id,
+            sender_id: payload.new.sender_id,
+            content: payload.new.encrypted_content || '',
+            created_at: payload.new.created_at,
+          }
+          setMessages(prev => [...prev, newMessage])
+        }
+      )
+      .subscribe()
+
+    // Subscribe to typing indicators
+    const typingChannel = supabase
+      .channel(`typing-${selectedConversation}`)
+      .on('broadcast', { event: 'typing' }, (payload) => {
+        const { user_id, is_typing } = payload.payload
+        if (user_id !== currentUser.id) {
+          setTypingUsers(prev => {
+            const newSet = new Set(prev)
+            if (is_typing) {
+              newSet.add(user_id)
+            } else {
+              newSet.delete(user_id)
+            }
+            return newSet
+          })
+        }
+      })
+      .subscribe()
+  }
 
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -143,9 +203,54 @@ export default function MessagesPage() {
     }
   }
 
+  const handleTyping = () => {
+    if (!selectedConversation || !currentUser) return
+
+    // Send typing indicator
+    supabase
+      .channel(`typing-${selectedConversation}`)
+      .send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { user_id: currentUser.id, is_typing: true }
+      })
+
+    // Clear previous timeout
+    if (typingTimeout) {
+      clearTimeout(typingTimeout)
+    }
+
+    // Set timeout to stop typing indicator
+    const timeout = setTimeout(() => {
+      supabase
+        .channel(`typing-${selectedConversation}`)
+        .send({
+          type: 'broadcast',
+          event: 'typing',
+          payload: { user_id: currentUser.id, is_typing: false }
+        })
+    }, 2000) // Stop typing indicator after 2 seconds
+
+    setTypingTimeout(timeout)
+  }
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newMessage.trim() || !selectedConversation || !currentUser) return
+
+    // Stop typing indicator
+    if (typingTimeout) {
+      clearTimeout(typingTimeout)
+      setTypingTimeout(null)
+    }
+    
+    supabase
+      .channel(`typing-${selectedConversation}`)
+      .send({
+        type: 'broadcast',
+        event: 'typing',
+        payload: { user_id: currentUser.id, is_typing: false }
+      })
 
     const { error } = await supabase.from('messages').insert({
       sender_id: currentUser.id,
@@ -159,7 +264,7 @@ export default function MessagesPage() {
     }
 
     setNewMessage('')
-    loadMessages(selectedConversation)
+    // Don't reload messages - real-time subscription will handle it
   }
 
   const searchUsers = async (query: string) => {
@@ -371,6 +476,25 @@ export default function MessagesPage() {
                   </div>
                 ))
               )}
+              
+              {/* Typing Indicator */}
+              {typingUsers.size > 0 && (
+                <div className="flex justify-start">
+                  <div className="bg-dark-elevated text-dark-text px-3 lg:px-4 py-2 lg:py-3 rounded-2xl text-sm lg:text-base">
+                    <div className="flex items-center space-x-1">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-dark-text-secondary rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-dark-text-secondary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-2 h-2 bg-dark-text-secondary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      </div>
+                      <span className="text-dark-text-secondary text-xs ml-2">typing...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Scroll anchor */}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Message Input */}
@@ -379,7 +503,10 @@ export default function MessagesPage() {
                 <input
                   type="text"
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={(e) => {
+                    setNewMessage(e.target.value)
+                    handleTyping()
+                  }}
                   placeholder="Type a message..."
                   className="flex-1 px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-sm lg:text-base focus:outline-none focus:ring-1 focus:ring-accent-primary"
                 />
