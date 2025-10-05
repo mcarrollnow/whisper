@@ -15,20 +15,28 @@ export interface AuthResult {
   error?: string
 }
 
-// Generate anonymous username
+// Generate anonymous username (client-side)
 export async function generateUsername(): Promise<string> {
-  const { data, error } = await supabase.rpc('generate_anonymous_username')
+  let attempts = 0
+  const maxAttempts = 10
   
-  if (error) {
-    console.error('Error generating username:', error)
-    // Fallback generation
+  while (attempts < maxAttempts) {
     const prefixes = ['whisper', 'secure', 'private', 'anon', 'ghost', 'shadow', 'cipher', 'vault']
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)]
     const number = Math.floor(Math.random() * 9999) + 1
-    return `@${prefix}.${number}`
+    const username = `@${prefix}.${number}`
+    
+    // Check if username is available
+    const isAvailable = await isUsernameAvailable(username)
+    if (isAvailable) {
+      return username
+    }
+    
+    attempts++
   }
   
-  return data
+  // Fallback to timestamp-based username
+  return `@user.${Date.now()}`
 }
 
 // Create account with just username and password

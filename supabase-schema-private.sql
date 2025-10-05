@@ -70,45 +70,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Enable Row Level Security
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-ALTER TABLE user_keys ENABLE ROW LEVEL SECURITY;
-
--- Users policies (more restrictive for privacy)
-CREATE POLICY "Users can view usernames for search only"
-  ON users FOR SELECT
-  TO authenticated
-  USING (true); -- Allow reading usernames for search, but not sensitive data
-
-CREATE POLICY "Users can update their own profile"
-  ON users FOR UPDATE
-  TO authenticated
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
-
--- Messages policies (unchanged)
-CREATE POLICY "Users can view their own messages"
-  ON messages FOR SELECT
-  TO authenticated
-  USING (auth.uid() = sender_id OR auth.uid() = recipient_id);
-
-CREATE POLICY "Users can insert messages"
-  ON messages FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = sender_id);
-
-CREATE POLICY "Users can delete their sent messages"
-  ON messages FOR DELETE
-  TO authenticated
-  USING (auth.uid() = sender_id);
-
--- User keys policies
-CREATE POLICY "Users can manage their own keys"
-  ON user_keys FOR ALL
-  TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
+-- Disable Row Level Security for custom authentication
+-- We'll handle security at the application level since we're not using Supabase Auth
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE messages DISABLE ROW LEVEL SECURITY;
+ALTER TABLE user_keys DISABLE ROW LEVEL SECURITY;
 
 -- Create indexes for performance
 CREATE INDEX users_username_idx ON users(username);
