@@ -271,28 +271,39 @@ export async function saveSession(user: SignalUser) {
     const fakePassword = token // Use the session token as password
 
     // Try to sign in first, if fails then sign up
-    let authResult = await supabase.auth.signInWithPassword({
+    const signInResult = await supabase.auth.signInWithPassword({
       email: fakeEmail,
       password: fakePassword
     })
 
-    if (authResult.error) {
+    if (signInResult.error) {
       // User doesn't exist, create it
-      authResult = await supabase.auth.signUp({
+      const signUpResult = await supabase.auth.signUp({
         email: fakeEmail,
         password: fakePassword
       })
-    }
 
-    if (authResult.error) {
-      console.error('❌ Failed to create Supabase auth session:', authResult.error)
+      if (signUpResult.error) {
+        console.error('❌ Failed to create Supabase auth session:', signUpResult.error)
+      } else {
+        console.log('✅ Supabase auth session created:', signUpResult.data.session?.access_token ? 'Token exists' : 'No token')
+
+        // Store mapping
+        if (signUpResult.data.user) {
+          await supabase.from('auth_mapping').upsert({
+            supabase_user_id: signUpResult.data.user.id,
+            signal_user_id: user.id
+          })
+          console.log('✅ Auth mapping created')
+        }
+      }
     } else {
-      console.log('✅ Supabase auth session created:', authResult.data.session?.access_token ? 'Token exists' : 'No token')
+      console.log('✅ Supabase auth session exists:', signInResult.data.session?.access_token ? 'Token exists' : 'No token')
 
       // Store mapping
-      if (authResult.data.user) {
+      if (signInResult.data.user) {
         await supabase.from('auth_mapping').upsert({
-          supabase_user_id: authResult.data.user.id,
+          supabase_user_id: signInResult.data.user.id,
           signal_user_id: user.id
         })
         console.log('✅ Auth mapping created')
