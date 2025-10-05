@@ -265,7 +265,8 @@ export async function saveSession(user: SignalUser) {
   // Also create Supabase auth session for realtime to work
   // This uses the user's ID as a custom JWT claim
   try {
-    await supabase.auth.signInAnonymously({
+    console.log('🔐 Creating Supabase auth session for realtime...')
+    const { data, error } = await supabase.auth.signInAnonymously({
       options: {
         data: {
           signal_user_id: user.id,
@@ -273,8 +274,13 @@ export async function saveSession(user: SignalUser) {
         }
       }
     })
+    if (error) {
+      console.error('❌ Failed to create Supabase auth session:', error)
+    } else {
+      console.log('✅ Supabase auth session created:', data.session?.access_token ? 'Token exists' : 'No token')
+    }
   } catch (error) {
-    console.error('Failed to create Supabase auth session:', error)
+    console.error('❌ Exception creating Supabase auth session:', error)
   }
 }
 
