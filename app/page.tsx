@@ -66,25 +66,27 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="h-screen bg-dark-bg flex items-center justify-center p-4 overflow-hidden">
+      <div className="w-full max-w-md max-h-full overflow-y-auto">
         {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-accent-primary to-accent-secondary rounded-full mx-auto mb-4 flex items-center justify-center">
-            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="Whisper Logo" 
+              className="w-16 h-16 object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-dark-text mb-2">Whisper</h1>
-          <p className="text-dark-text-secondary">End-to-end encrypted messaging</p>
+          <h1 className="text-2xl font-bold text-dark-text mb-2">Whisper</h1>
+          <p className="text-dark-text-secondary text-sm">End-to-end encrypted messaging</p>
         </div>
 
         {/* Auth Form */}
-        <div className="bg-dark-surface rounded-2xl p-8 border border-dark-border shadow-2xl">
-          <div className="flex gap-2 mb-6">
+        <div className="bg-dark-surface rounded-2xl p-6 border border-dark-border shadow-2xl">
+          <div className="flex gap-2 mb-4">
             <button
               onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
+              className={`flex-1 py-2 rounded-lg font-medium text-sm transition-colors ${
                 isLogin
                   ? 'bg-accent-primary text-white'
                   : 'bg-dark-elevated text-dark-text-secondary hover:text-dark-text'
@@ -94,7 +96,7 @@ export default function AuthPage() {
             </button>
             <button
               onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
+              className={`flex-1 py-2 rounded-lg font-medium text-sm transition-colors ${
                 !isLogin
                   ? 'bg-accent-primary text-white'
                   : 'bg-dark-elevated text-dark-text-secondary hover:text-dark-text'
@@ -105,22 +107,22 @@ export default function AuthPage() {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-accent-error/10 border border-accent-error/20 rounded-lg text-accent-error text-sm">
+            <div className="mb-3 p-2 bg-accent-error/10 border border-accent-error/20 rounded-lg text-accent-error text-xs">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleAuth} className="space-y-4">
+          <form onSubmit={handleAuth} className="space-y-3">
             {!isLogin && (
               <div>
-                <label className="block text-dark-text text-sm font-medium mb-2">
+                <label className="block text-dark-text text-xs font-medium mb-1">
                   Username
                 </label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-3 bg-dark-elevated border border-dark-border rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
+                  className="w-full px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text text-sm placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
                   placeholder="Choose a username"
                   required={!isLogin}
                 />
@@ -128,28 +130,28 @@ export default function AuthPage() {
             )}
 
             <div>
-              <label className="block text-dark-text text-sm font-medium mb-2">
+              <label className="block text-dark-text text-xs font-medium mb-1">
                 Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-dark-elevated border border-dark-border rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
+                className="w-full px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text text-sm placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
                 placeholder="your@email.com"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-dark-text text-sm font-medium mb-2">
+              <label className="block text-dark-text text-xs font-medium mb-1">
                 Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-dark-elevated border border-dark-border rounded-lg text-dark-text placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
+                className="w-full px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text text-sm placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
                 placeholder="••••••••"
                 required
                 minLength={6}
@@ -159,13 +161,13 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-accent-primary text-white rounded-lg font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-2 bg-accent-primary text-white rounded-lg font-medium text-sm hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? 'Please wait...' : isLogin ? 'Login' : 'Create Account'}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-dark-text-secondary">
+          <div className="mt-4 text-center text-xs text-dark-text-secondary">
             <p>🔒 Your messages are end-to-end encrypted</p>
             <p className="mt-1">Signal Protocol • AES-256</p>
           </div>

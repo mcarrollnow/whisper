@@ -202,7 +202,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="flex h-screen bg-dark-bg relative">
+    <div className="flex h-screen bg-dark-bg relative overflow-hidden">
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div 
@@ -216,28 +216,35 @@ export default function MessagesPage() {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
         lg:translate-x-0 
         fixed lg:relative 
-        w-80 sm:w-96 lg:w-80 
+        w-80 sm:w-96 lg:w-80 xl:w-96
         bg-dark-surface 
         border-r border-dark-border 
         flex flex-col 
         z-50 
         transition-transform duration-300 ease-in-out
-        h-full
+        h-screen
       `}>
-        <div className="p-4 border-b border-dark-border">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-dark-text">Whisper</h1>
+        <div className="flex-shrink-0 p-3 lg:p-4 border-b border-dark-border">
+          <div className="flex items-center justify-between mb-3 lg:mb-4">
             <div className="flex items-center gap-2">
+              <img 
+                src="/logo.png" 
+                alt="Whisper Logo" 
+                className="w-6 h-6 lg:w-7 lg:h-7 object-contain"
+              />
+              <h1 className="text-lg lg:text-xl font-bold text-dark-text">Whisper</h1>
+            </div>
+            <div className="flex items-center gap-1 lg:gap-2">
               <button 
                 onClick={() => setSidebarOpen(false)} 
                 className="p-2 hover:bg-dark-elevated rounded-lg lg:hidden"
               >
-                <svg className="w-5 h-5 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
               <button onClick={logout} className="p-2 hover:bg-dark-elevated rounded-lg">
-                <svg className="w-5 h-5 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 lg:w-5 lg:h-5 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
               </button>
@@ -246,13 +253,13 @@ export default function MessagesPage() {
           
           <button
             onClick={() => setShowSearch(!showSearch)}
-            className="w-full px-4 py-3 bg-accent-primary text-white rounded-lg hover:bg-blue-600 font-medium"
+            className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-accent-primary text-white rounded-lg hover:bg-blue-600 font-medium text-sm lg:text-base"
           >
             + New Message
           </button>
 
           {showSearch && (
-            <div className="mt-4">
+            <div className="mt-3 lg:mt-4">
               <input
                 type="text"
                 value={searchQuery}
@@ -261,18 +268,18 @@ export default function MessagesPage() {
                   searchUsers(e.target.value)
                 }}
                 placeholder="Search users..."
-                className="w-full px-4 py-3 bg-dark-elevated border border-dark-border rounded-lg text-dark-text text-base"
+                className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border rounded-lg text-dark-text text-sm lg:text-base"
               />
               {searchResults.length > 0 && (
-                <div className="mt-2 bg-dark-elevated rounded-lg max-h-60 overflow-y-auto">
+                <div className="mt-2 bg-dark-elevated rounded-lg max-h-32 lg:max-h-40 overflow-y-auto">
                   {searchResults.map((user) => (
                     <button
                       key={user.id}
                       onClick={() => startConversation(user)}
-                      className="w-full px-4 py-4 hover:bg-dark-surface text-left border-b border-dark-border last:border-b-0"
+                      className="w-full px-3 lg:px-4 py-2 lg:py-3 hover:bg-dark-surface text-left border-b border-dark-border last:border-b-0"
                     >
-                      <div className="font-medium text-dark-text text-base">{user.username}</div>
-                      <div className="text-sm text-dark-text-secondary">{user.email}</div>
+                      <div className="font-medium text-dark-text text-sm lg:text-base">{user.username}</div>
+                      <div className="text-xs lg:text-sm text-dark-text-secondary">{user.email}</div>
                     </button>
                   ))}
                 </div>
@@ -281,7 +288,7 @@ export default function MessagesPage() {
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent">
           {conversations.map((conv) => (
             <button
               key={conv.id}
@@ -289,57 +296,57 @@ export default function MessagesPage() {
                 setSelectedConversation(conv.id)
                 setSidebarOpen(false) // Close sidebar on mobile
               }}
-              className={`w-full px-4 py-4 border-b border-dark-border hover:bg-dark-elevated text-left transition-colors ${
+              className={`w-full px-3 lg:px-4 py-3 lg:py-4 border-b border-dark-border hover:bg-dark-elevated text-left transition-colors ${
                 selectedConversation === conv.id ? 'bg-dark-elevated' : ''
               }`}
             >
-              <div className="font-medium text-dark-text text-base mb-1">{conv.other_user.username}</div>
-              <div className="text-sm text-dark-text-secondary truncate">{conv.last_message}</div>
+              <div className="font-medium text-dark-text text-sm lg:text-base mb-1">{conv.other_user.username}</div>
+              <div className="text-xs lg:text-sm text-dark-text-secondary truncate">{conv.last_message}</div>
             </button>
           ))}
         </div>
 
-        <div className="p-4 border-t border-dark-border">
-          <div className="font-medium text-dark-text text-base">{currentUser?.username}</div>
-          <div className="text-sm text-dark-text-secondary">{currentUser?.email}</div>
+        <div className="flex-shrink-0 p-3 lg:p-4 border-t border-dark-border">
+          <div className="font-medium text-dark-text text-sm lg:text-base">{currentUser?.username}</div>
+          <div className="text-xs lg:text-sm text-dark-text-secondary">{currentUser?.email}</div>
         </div>
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-screen">
         {selectedConversation ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b border-dark-border bg-dark-surface flex items-center">
+            <div className="flex-shrink-0 p-3 lg:p-4 border-b border-dark-border bg-dark-surface flex items-center">
               <button 
                 onClick={() => setSidebarOpen(true)}
-                className="p-2 hover:bg-dark-elevated rounded-lg mr-3 lg:hidden"
+                className="p-2 hover:bg-dark-elevated rounded-lg mr-2 lg:hidden"
               >
-                <svg className="w-5 h-5 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-accent-primary rounded-full flex items-center justify-center mr-3">
-                  <span className="text-white font-medium text-sm">
+                <div className="w-7 h-7 lg:w-8 lg:h-8 bg-accent-primary rounded-full flex items-center justify-center mr-2 lg:mr-3">
+                  <span className="text-white font-medium text-xs lg:text-sm">
                     {conversations.find(c => c.id === selectedConversation)?.other_user.username?.[0]?.toUpperCase()}
                   </span>
                 </div>
-                <div className="font-medium text-dark-text text-base">
+                <div className="font-medium text-dark-text text-sm lg:text-base">
                   {conversations.find(c => c.id === selectedConversation)?.other_user.username}
                 </div>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 min-h-0 overflow-y-auto p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
                   className={`flex ${msg.sender_id === currentUser?.id ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-xs sm:max-w-sm md:max-w-md px-4 py-3 rounded-2xl text-base ${
+                    className={`max-w-xs lg:max-w-md xl:max-w-lg px-3 lg:px-4 py-2 lg:py-3 rounded-2xl text-sm lg:text-base ${
                       msg.sender_id === currentUser?.id
                         ? 'bg-accent-primary text-white'
                         : 'bg-dark-elevated text-dark-text'
@@ -352,18 +359,18 @@ export default function MessagesPage() {
             </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-dark-border bg-dark-surface">
-              <form onSubmit={sendMessage} className="flex gap-3">
+            <div className="flex-shrink-0 p-3 lg:p-4 border-t border-dark-border bg-dark-surface">
+              <form onSubmit={sendMessage} className="flex gap-2 lg:gap-3">
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1 px-4 py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-base focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                  className="flex-1 px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-sm lg:text-base focus:outline-none focus:ring-1 focus:ring-accent-primary"
                 />
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium min-w-[80px]"
+                  className="px-4 lg:px-6 py-2 lg:py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-sm lg:text-base"
                 >
                   Send
                 </button>
@@ -371,18 +378,25 @@ export default function MessagesPage() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-dark-text-secondary p-8">
+          <div className="flex-1 flex flex-col items-center justify-center text-dark-text-secondary p-4 lg:p-8">
             <button 
               onClick={() => setSidebarOpen(true)}
-              className="mb-4 p-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 lg:hidden"
+              className="mb-3 lg:mb-4 p-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 lg:hidden"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <div className="text-center">
-              <h2 className="text-xl font-medium text-dark-text mb-2">Welcome to Whisper</h2>
-              <p className="text-dark-text-secondary">Select a conversation to start messaging</p>
+              <div className="mb-4 lg:mb-6">
+                <img 
+                  src="/logo.png" 
+                  alt="Whisper Logo" 
+                  className="w-16 h-16 lg:w-20 lg:h-20 mx-auto object-contain opacity-50"
+                />
+              </div>
+              <h2 className="text-lg lg:text-xl font-medium text-dark-text mb-2">Welcome to Whisper</h2>
+              <p className="text-dark-text-secondary text-sm lg:text-base">Select a conversation to start messaging</p>
             </div>
           </div>
         )}
