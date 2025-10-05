@@ -104,10 +104,25 @@ export default function MessagesPage() {
         },
         async (payload) => {
           console.log('Received new message:', payload)
+          let content = payload.new.ciphertext || ''
 
-          // For now, just display the ciphertext directly to ensure real-time works
-          // TODO: Fix encryption/decryption synchronization
-          const content = payload.new.ciphertext || ''
+          // Try to decrypt with shared chain key
+          if (payload.new.mac && payload.new.mac !== 'no_encryption') {
+            try {
+              const session = await getSignalSession(currentUser.id, selectedConversation!)
+              if (session && session.chain_key_recv) {
+                const decrypted = decryptMessage(payload.new.ciphertext, payload.new.mac, session.chain_key_recv)
+                if (decrypted) {
+                  content = decrypted.message
+                  console.log('Successfully decrypted message:', content)
+                } else {
+                  console.error('Decryption returned null')
+                }
+              }
+            } catch (error) {
+              console.error('Decryption failed:', error)
+            }
+          }
 
           const newMessage = {
             id: payload.new.id,
@@ -324,19 +339,15 @@ export default function MessagesPage() {
       }
     }
 
-    // Encrypt message using Signal Protocol
+    // Simplified encryption - use shared chain key (don't update it)
     let ciphertext = newMessage
     let mac = 'no_encryption'
-    let newChainKey = session.chain_key_send
 
     if (session.chain_key_send) {
       const encrypted = encryptMessage(newMessage, session.chain_key_send)
       ciphertext = encrypted.ciphertext
       mac = encrypted.mac
-      newChainKey = encrypted.newChainKey
-    } else {
-      // Initialize chain key if not exists
-      newChainKey = 'initial_chain_key_' + Date.now()
+      // DON'T update chain keys - keep them synchronized
     }
 
     // Send encrypted message
@@ -355,9 +366,8 @@ export default function MessagesPage() {
       return
     }
 
-    // Update session state
+    // Update only the counter, not the chain keys
     await updateSession(session.id, {
-      chain_key_send: newChainKey,
       send_counter: session.send_counter + 1
     })
 
