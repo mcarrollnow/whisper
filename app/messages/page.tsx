@@ -642,12 +642,17 @@ export default function MessagesPage() {
             {/* Message Input - Floating attached to keyboard */}
             <div className="fixed bottom-0 left-0 right-0 lg:left-80 xl:left-96 p-3 lg:p-4 border-t border-dark-border bg-dark-surface z-20">
               <form onSubmit={sendMessage} className="flex gap-2">
-                <input
-                  type="text"
+                <textarea
                   value={newMessage}
                   onChange={(e) => {
                     setNewMessage(e.target.value)
                     handleTyping()
+                  }}
+                  onKeyDown={(e) => {
+                    // Prevent form submission on Enter
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                    }
                   }}
                   onFocus={() => {
                     // Prevent zoom on focus
@@ -671,12 +676,13 @@ export default function MessagesPage() {
                     }, 100)
                   }}
                   placeholder="Type a message..."
-                  className="flex-1 px-3 lg:px-4 py-2.5 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-base focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                  rows={1}
+                  className="flex-1 px-3 lg:px-4 py-2.5 lg:py-3 bg-dark-elevated border border-dark-border rounded-2xl text-dark-text text-base focus:outline-none focus:ring-2 focus:ring-accent-primary resize-none overflow-y-auto max-h-32"
                   style={{ fontSize: '16px' }}
                 />
                 <button
                   type="submit"
-                  className="px-5 lg:px-6 py-2.5 lg:py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-base whitespace-nowrap flex-shrink-0"
+                  className="px-5 lg:px-6 py-2.5 lg:py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-base whitespace-nowrap flex-shrink-0 self-end"
                   style={{ fontSize: '16px' }}
                 >
                   Send
