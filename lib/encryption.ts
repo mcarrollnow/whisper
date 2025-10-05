@@ -6,10 +6,11 @@ import {
   MessageType,
   SignedPublicPreKeyType,
   PreKeyType,
+  StorageType,
 } from '@privacyresearch/libsignal-protocol-typescript'
 
-// Signal Protocol Store implementation
-export class SignalProtocolStore {
+// Signal Protocol Store implementation matching StorageType interface
+export class SignalProtocolStore implements StorageType {
   private store: Map<string, any>
 
   constructor() {
@@ -40,7 +41,11 @@ export class SignalProtocolStore {
     return this.get('registrationId')
   }
 
-  async isTrustedIdentity(identifier: string, identityKey: ArrayBuffer): Promise<boolean> {
+  async isTrustedIdentity(
+    identifier: string,
+    identityKey: ArrayBuffer,
+    direction?: string
+  ): Promise<boolean> {
     const trusted = await this.get(`identity_${identifier}`)
     if (trusted === undefined) {
       return true
@@ -51,7 +56,7 @@ export class SignalProtocolStore {
   async saveIdentity(identifier: string, identityKey: ArrayBuffer): Promise<boolean> {
     const existing = await this.get(`identity_${identifier}`)
     await this.put(`identity_${identifier}`, identityKey)
-    
+
     if (existing && !this.arrayBufferEquals(identityKey, existing)) {
       return true // Identity changed
     }
@@ -59,10 +64,11 @@ export class SignalProtocolStore {
   }
 
   // PreKey methods
-  async loadPreKey(keyId: number): Promise<any> {
-    const preKey = await this.get(`prekey_${keyId}`)
+  async loadPreKey(keyId: string | number): Promise<any> {
+    const id = typeof keyId === 'string' ? parseInt(keyId) : keyId
+    const preKey = await this.get(`prekey_${id}`)
     if (!preKey) {
-      throw new Error('PreKey not found')
+      return undefined
     }
     return {
       pubKey: preKey.pubKey,
@@ -70,19 +76,22 @@ export class SignalProtocolStore {
     }
   }
 
-  async storePreKey(keyId: number, keyPair: any): Promise<void> {
-    await this.put(`prekey_${keyId}`, keyPair)
+  async storePreKey(keyId: string | number, keyPair: any): Promise<void> {
+    const id = typeof keyId === 'string' ? parseInt(keyId) : keyId
+    await this.put(`prekey_${id}`, keyPair)
   }
 
-  async removePreKey(keyId: number): Promise<void> {
-    await this.remove(`prekey_${keyId}`)
+  async removePreKey(keyId: string | number): Promise<void> {
+    const id = typeof keyId === 'string' ? parseInt(keyId) : keyId
+    await this.remove(`prekey_${id}`)
   }
 
   // SignedPreKey methods
-  async loadSignedPreKey(keyId: number): Promise<any> {
-    const signedPreKey = await this.get(`signedprekey_${keyId}`)
+  async loadSignedPreKey(keyId: string | number): Promise<any> {
+    const id = typeof keyId === 'string' ? parseInt(keyId) : keyId
+    const signedPreKey = await this.get(`signedprekey_${id}`)
     if (!signedPreKey) {
-      throw new Error('SignedPreKey not found')
+      return undefined
     }
     return {
       pubKey: signedPreKey.pubKey,
@@ -90,12 +99,14 @@ export class SignalProtocolStore {
     }
   }
 
-  async storeSignedPreKey(keyId: number, keyPair: any): Promise<void> {
-    await this.put(`signedprekey_${keyId}`, keyPair)
+  async storeSignedPreKey(keyId: string | number, keyPair: any): Promise<void> {
+    const id = typeof keyId === 'string' ? parseInt(keyId) : keyId
+    await this.put(`signedprekey_${id}`, keyPair)
   }
 
-  async removeSignedPreKey(keyId: number): Promise<void> {
-    await this.remove(`signedprekey_${keyId}`)
+  async removeSignedPreKey(keyId: string | number): Promise<void> {
+    const id = typeof keyId === 'string' ? parseInt(keyId) : keyId
+    await this.remove(`signedprekey_${id}`)
   }
 
   // Session methods
@@ -269,5 +280,3 @@ export class SignalEncryptionService {
 
 // Export singleton instance
 export const signalEncryption = new SignalEncryptionService()
-
-
