@@ -481,8 +481,8 @@ export default function MessagesPage() {
   }
 
   const logout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
+    await clearSession()
+    router.push('/auth')
   }
 
   if (loading) {
