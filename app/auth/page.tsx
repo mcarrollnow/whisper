@@ -198,9 +198,9 @@ export default function PrivateAuthPage() {
 
           <div className="mt-4 text-center text-xs text-dark-text-secondary">
             <div className="space-y-1">
-              <p>🔒 <strong>Zero Knowledge:</strong> No email, phone, or personal data</p>
-              <p>👤 <strong>Anonymous:</strong> Auto-generated usernames</p>
-              <p>🔐 <strong>Encrypted:</strong> End-to-end Signal Protocol</p>
+              <p><strong>Zero Knowledge:</strong> No email, phone, or personal data</p>
+              <p><strong>Anonymous:</strong> Auto-generated usernames</p>
+              <p><strong>Encrypted:</strong> End-to-end Signal Protocol</p>
             </div>
           </div>
         </div>
