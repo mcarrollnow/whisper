@@ -401,7 +401,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="flex h-screen bg-dark-bg relative overflow-hidden">
+    <div className="flex h-screen bg-dark-background text-dark-text overflow-hidden fixed inset-0 z-0">
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div 
@@ -423,7 +423,7 @@ export default function MessagesPage() {
         transition-transform duration-300 ease-in-out
         h-screen
         safe-area-inset
-        lg:overflow-y-auto
+        overflow-hidden
       `}>
         <div className="flex-shrink-0 p-3 lg:p-4 border-b border-dark-border">
           <div className="flex items-center justify-between mb-3 lg:mb-4">
@@ -492,7 +492,7 @@ export default function MessagesPage() {
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent">
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent overscroll-contain">
           {conversations.map((conv) => (
             <button
               key={conv.id}
@@ -543,7 +543,7 @@ export default function MessagesPage() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent">
+            <div className="flex-1 min-h-0 overflow-y-auto p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent overscroll-contain">
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-dark-text-secondary text-sm">
                   No messages yet. Start the conversation!

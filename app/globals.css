@@ -49,6 +49,26 @@ input[type="text"], textarea {
   background: transparent;
 }
 
+/* Fixed layout like iMessage - no body scrolling */
+html, body {
+  height: 100vh;
+  height: -webkit-fill-available;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Prevent overscroll bounce on iOS */
+body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure scrollable areas contain their scrolling */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+
 /* Mobile viewport fixes */
 @media screen and (max-width: 768px) {
   html {
@@ -58,6 +78,8 @@ input[type="text"], textarea {
   body {
     min-height: 100vh;
     min-height: -webkit-fill-available;
+    position: fixed;
+    overflow: hidden;
   }
   
   /* Ensure modals are properly sized on mobile */
