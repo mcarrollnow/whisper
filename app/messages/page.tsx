@@ -330,12 +330,25 @@ export default function MessagesPage() {
   }
 
   const generateMyInviteCode = async () => {
-    if (!currentUser) return
+    if (!currentUser) {
+      alert('No user logged in')
+      return
+    }
     
+    console.log('Generating invite code for user:', currentUser.id)
     const result = await generateInviteCode(currentUser.id)
+    
+    if (result.error) {
+      console.error('Error generating invite code:', result.error)
+      alert('Error generating invite code: ' + result.error)
+      return
+    }
+    
     if (result.code) {
       setCurrentInviteCode(result.code)
       setShowInviteModal(true)
+    } else {
+      alert('No invite code returned')
     }
   }
 
