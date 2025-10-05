@@ -27,11 +27,20 @@
 
 /* Better mobile input handling - prevent zoom */
 input[type="text"], textarea, button, select {
-  font-size: 16px; /* Prevents zoom on iOS */
+  font-size: 16px !important; /* Prevents zoom on iOS */
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
   user-select: text;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Prevent input zoom on focus */
+input:focus, textarea:focus, select:focus {
+  font-size: 16px !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* Prevent zoom on double tap */
@@ -91,11 +100,13 @@ html {
   height: -webkit-fill-available;
   overflow: hidden;
   touch-action: manipulation;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  zoom: 1;
-  -webkit-user-zoom: fixed;
-  -moz-user-zoom: fixed;
+  -webkit-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+  zoom: 1 !important;
+  -webkit-user-zoom: fixed !important;
+  -moz-user-zoom: fixed !important;
+  transform: scale(1) !important;
+  transform-origin: 0 0 !important;
 }
 
 body {

@@ -624,11 +624,13 @@ export default function MessagesPage() {
                     }
                   }}
                   placeholder="Type a message..."
-                  className="flex-1 px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-sm lg:text-base focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                  className="flex-1 px-3 lg:px-4 py-2.5 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-base focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                  style={{ fontSize: '16px' }}
                 />
                 <button
                   type="submit"
-                  className="px-4 lg:px-6 py-2 lg:py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-sm lg:text-base whitespace-nowrap"
+                  className="px-5 lg:px-6 py-2.5 lg:py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-base whitespace-nowrap flex-shrink-0"
+                  style={{ fontSize: '16px' }}
                 >
                   Send
                 </button>
