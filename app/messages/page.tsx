@@ -421,7 +421,7 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="flex h-screen bg-dark-bg relative overflow-hidden">
+    <div className="flex h-screen bg-dark-bg relative overflow-hidden w-full max-w-full">
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div 
@@ -562,7 +562,7 @@ export default function MessagesPage() {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 min-h-0 overflow-y-auto p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent overscroll-contain">
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-dark-text-secondary text-sm">
                   No messages yet. Start the conversation!
@@ -574,7 +574,7 @@ export default function MessagesPage() {
                     className={`flex ${msg.sender_id === currentUser?.id ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-xs lg:max-w-md xl:max-w-lg px-3 lg:px-4 py-2 lg:py-3 rounded-2xl text-sm lg:text-base ${
+                      className={`max-w-[75%] sm:max-w-xs lg:max-w-md xl:max-w-lg px-3 lg:px-4 py-2 lg:py-3 rounded-2xl text-sm lg:text-base break-words ${
                         msg.sender_id === currentUser?.id
                           ? 'bg-accent-primary text-white'
                           : 'bg-dark-elevated text-dark-text'
