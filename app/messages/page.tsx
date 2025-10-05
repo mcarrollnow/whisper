@@ -558,12 +558,12 @@ export default function MessagesPage() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
         {selectedConversation ? (
           <>
             {/* Chat Header */}
             <div className="flex-shrink-0 p-3 lg:p-4 border-b border-dark-border bg-dark-surface flex items-center">
-              <button 
+              <button
                 onClick={() => setSidebarOpen(true)}
                 className="p-2 hover:bg-dark-elevated rounded-lg mr-2 lg:hidden"
               >
@@ -583,8 +583,8 @@ export default function MessagesPage() {
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {/* Messages - Full height, scrollable behind input */}
+            <div className="absolute inset-0 top-[57px] lg:top-[65px] overflow-y-auto overflow-x-hidden p-3 lg:p-4 pb-[80px] lg:pb-[88px] space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent" style={{ WebkitOverflowScrolling: 'touch' }}>
               {messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-dark-text-secondary text-sm">
                   No messages yet. Start the conversation!
@@ -607,7 +607,7 @@ export default function MessagesPage() {
                   </div>
                 ))
               )}
-              
+
               {/* Typing Indicator */}
               {typingUsers.size > 0 && (
                 <div className="flex justify-start">
@@ -623,13 +623,13 @@ export default function MessagesPage() {
                   </div>
                 </div>
               )}
-              
+
               {/* Scroll anchor */}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Message Input - Fixed to bottom */}
-            <div className="flex-shrink-0 p-3 lg:p-4 border-t border-dark-border bg-dark-surface">
+            {/* Message Input - Floating attached to keyboard */}
+            <div className="fixed bottom-0 left-0 right-0 lg:left-80 xl:left-96 p-3 lg:p-4 border-t border-dark-border bg-dark-surface z-20">
               <form onSubmit={sendMessage} className="flex gap-2">
                 <input
                   type="text"
