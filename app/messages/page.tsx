@@ -616,6 +616,13 @@ export default function MessagesPage() {
                     setNewMessage(e.target.value)
                     handleTyping()
                   }}
+                  onBlur={() => {
+                    // Reset zoom on iOS when keyboard dismisses
+                    if (typeof window !== 'undefined') {
+                      window.scrollTo(0, 0)
+                      document.body.scrollTop = 0
+                    }
+                  }}
                   placeholder="Type a message..."
                   className="flex-1 px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border rounded-full text-dark-text text-sm lg:text-base focus:outline-none focus:ring-2 focus:ring-accent-primary"
                 />
