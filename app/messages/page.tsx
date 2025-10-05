@@ -104,23 +104,10 @@ export default function MessagesPage() {
         },
         async (payload) => {
           console.log('Received new message:', payload)
-          let content = payload.new.ciphertext || ''
 
-          // Try to decrypt real-time message
-          if (payload.new.session_id && payload.new.mac && currentUser && payload.new.mac !== 'no_encryption') {
-            const session = await getSignalSession(currentUser.id, selectedConversation!)
-            if (session && session.chain_key_recv) {
-              const decrypted = decryptMessage(payload.new.ciphertext, payload.new.mac, session.chain_key_recv)
-              if (decrypted) {
-                content = decrypted.message
-                // Update session with new chain key
-                await updateSession(session.id, {
-                  chain_key_recv: decrypted.newChainKey,
-                  recv_counter: session.recv_counter + 1
-                })
-              }
-            }
-          }
+          // For now, just display the ciphertext directly to ensure real-time works
+          // TODO: Fix encryption/decryption synchronization
+          const content = payload.new.ciphertext || ''
 
           const newMessage = {
             id: payload.new.id,
