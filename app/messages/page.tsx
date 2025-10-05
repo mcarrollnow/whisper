@@ -89,7 +89,9 @@ export default function MessagesPage() {
   const setupRealtimeSubscription = () => {
     if (!selectedConversation || !currentUser) return () => {}
 
-    console.log('Setting up realtime subscription for conversation:', selectedConversation)
+    console.log('🔔 Setting up realtime subscription for conversation:', selectedConversation)
+    console.log('🔔 Current user:', currentUser.id)
+    console.log('🔔 Filter:', `or(and(sender_id.eq.${currentUser.id},recipient_id.eq.${selectedConversation}),and(sender_id.eq.${selectedConversation},recipient_id.eq.${currentUser.id}))`)
 
     // Subscribe to new messages
     const messageChannel = supabase
@@ -103,7 +105,7 @@ export default function MessagesPage() {
           filter: `or(and(sender_id.eq.${currentUser.id},recipient_id.eq.${selectedConversation}),and(sender_id.eq.${selectedConversation},recipient_id.eq.${currentUser.id}))`
         },
         async (payload) => {
-          console.log('Received new message:', payload)
+          console.log('📨 Received new message:', payload)
           let content = payload.new.ciphertext || ''
 
           // Try to decrypt with shared chain key
@@ -114,14 +116,18 @@ export default function MessagesPage() {
                 const decrypted = decryptMessage(payload.new.ciphertext, payload.new.mac, session.chain_key_recv)
                 if (decrypted) {
                   content = decrypted.message
-                  console.log('Successfully decrypted message:', content)
+                  console.log('✅ Successfully decrypted message:', content)
                 } else {
-                  console.error('Decryption returned null')
+                  console.error('❌ Decryption returned null')
                 }
+              } else {
+                console.log('⚠️ No session or chain key found')
               }
             } catch (error) {
-              console.error('Decryption failed:', error)
+              console.error('❌ Decryption failed:', error)
             }
+          } else {
+            console.log('ℹ️ Message not encrypted')
           }
 
           const newMessage = {
@@ -130,8 +136,14 @@ export default function MessagesPage() {
             content,
             created_at: payload.new.created_at,
           }
-          console.log('Adding message to state:', newMessage)
-          setMessages(prev => [...prev, newMessage])
+          console.log('➕ Adding message to state:', newMessage)
+          console.log('📊 Current messages count:', messages.length)
+          setMessages(prev => {
+            console.log('📊 Previous messages:', prev.length)
+            const updated = [...prev, newMessage]
+            console.log('📊 Updated messages:', updated.length)
+            return updated
+          })
         }
       )
       .subscribe((status) => {
@@ -209,17 +221,38 @@ export default function MessagesPage() {
 
     if (!users) return
 
-    // Create conversations
-    const convs = users.map(user => {
+    // Create conversations with decrypted preview
+    const convs = await Promise.all(users.map(async user => {
       const lastMsg = data.find(
         msg => msg.sender_id === user.id || msg.recipient_id === user.id
       )
+
+      let preview = 'Start chatting...'
+      if (lastMsg) {
+        preview = lastMsg.ciphertext
+
+        // Try to decrypt preview
+        if (lastMsg.mac && lastMsg.mac !== 'no_encryption') {
+          try {
+            const session = await getSignalSession(userId, user.id)
+            if (session && session.chain_key_recv) {
+              const decrypted = decryptMessage(lastMsg.ciphertext, lastMsg.mac, session.chain_key_recv)
+              if (decrypted) {
+                preview = decrypted.message
+              }
+            }
+          } catch (error) {
+            console.error('Failed to decrypt preview:', error)
+          }
+        }
+      }
+
       return {
         id: user.id,
         other_user: user,
-        last_message: lastMsg?.ciphertext || 'Start chatting...',
+        last_message: preview,
       }
-    })
+    }))
 
     setConversations(convs)
   }
