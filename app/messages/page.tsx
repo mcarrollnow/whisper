@@ -3,8 +3,9 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { getSession, clearSession, searchSignalUsers } from '@/lib/signal-auth'
+import { getSession, clearSession } from '@/lib/signal-auth'
 import { createSession, getSession as getSignalSession, updateSession, encryptMessage, decryptMessage } from '@/lib/signal-session'
+import { getUserContacts, generateInviteCode, getCurrentInviteCode, useInviteCode, areUsersContacts } from '@/lib/secure-contacts'
 
 type User = {
   id: string
@@ -34,9 +35,12 @@ export default function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<User[]>([])
-  const [showSearch, setShowSearch] = useState(false)
+  const [inviteCode, setInviteCode] = useState('')
+  const [currentInviteCode, setCurrentInviteCode] = useState('')
+  const [showInviteModal, setShowInviteModal] = useState(false)
+  const [showAddContactModal, setShowAddContactModal] = useState(false)
+  const [addContactCode, setAddContactCode] = useState('')
+  const [contacts, setContacts] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set())
@@ -134,6 +138,7 @@ export default function MessagesPage() {
     }
 
     setCurrentUser(user)
+    loadContacts(user.id)
     loadConversations(user.id)
     setLoading(false)
   }
@@ -333,25 +338,41 @@ export default function MessagesPage() {
     // Don't reload messages - real-time subscription will handle it
   }
 
-  const searchUsers = async (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([])
-      return
-    }
+  const loadContacts = async (userId: string) => {
+    const contactsList = await getUserContacts(userId)
+    const contactUsers = contactsList.map(contact => contact.contact_user)
+    setContacts(contactUsers)
+  }
 
-    if (currentUser) {
-      const results = await searchSignalUsers(query, currentUser.id)
-      setSearchResults(results)
+  const generateMyInviteCode = async () => {
+    if (!currentUser) return
+    
+    const result = await generateInviteCode(currentUser.id)
+    if (result.code) {
+      setCurrentInviteCode(result.code)
+      setShowInviteModal(true)
+    }
+  }
+
+  const handleAddContact = async () => {
+    if (!currentUser || !addContactCode.trim()) return
+    
+    const result = await useInviteCode(addContactCode.trim(), currentUser.id)
+    if (result.user) {
+      // Reload contacts
+      await loadContacts(currentUser.id)
+      setShowAddContactModal(false)
+      setAddContactCode('')
+      // Start conversation with new contact
+      setSelectedConversation(result.user.id)
+      setSidebarOpen(false)
     } else {
-      setSearchResults([])
+      alert(result.error || 'Failed to add contact')
     }
   }
 
   const startConversation = (user: User) => {
     setSelectedConversation(user.id)
-    setShowSearch(false)
-    setSearchQuery('')
-    setSearchResults([])
     setSidebarOpen(false) // Close sidebar on mobile when starting conversation
     
     if (!conversations.find(c => c.id === user.id)) {
