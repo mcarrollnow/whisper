@@ -7,6 +7,7 @@ import {
   SignedPublicPreKeyType,
   PreKeyType,
   StorageType,
+  Direction,
 } from '@privacyresearch/libsignal-protocol-typescript'
 
 // Signal Protocol Store implementation matching StorageType interface
@@ -44,7 +45,7 @@ export class SignalProtocolStore implements StorageType {
   async isTrustedIdentity(
     identifier: string,
     identityKey: ArrayBuffer,
-    direction?: string
+    direction: Direction
   ): Promise<boolean> {
     const trusted = await this.get(`identity_${identifier}`)
     if (trusted === undefined) {
