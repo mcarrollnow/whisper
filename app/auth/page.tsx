@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createAccount, loginWithUsername, generateUsername, saveSession } from '@/lib/auth'
+import { createSignalAccount, loginSignalUser, generateUsername, saveSession } from '@/lib/signal-auth'
 
 export default function PrivateAuthPage() {
   const [isLogin, setIsLogin] = useState(true)
@@ -28,7 +28,7 @@ export default function PrivateAuthPage() {
     try {
       if (isLogin) {
         // Login with username and password
-        const result = await loginWithUsername(username, password)
+        const result = await loginSignalUser(username, password)
         
         if (result.error) {
           setError(result.error)
@@ -43,7 +43,7 @@ export default function PrivateAuthPage() {
           return
         }
         
-        const result = await createAccount(password, displayName)
+        const result = await createSignalAccount(password, displayName)
         
         if (result.error) {
           setError(result.error)

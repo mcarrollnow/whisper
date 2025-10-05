@@ -162,17 +162,44 @@ export async function updateDisplayName(userId: string, displayName: string): Pr
   }
 }
 
-// Session management (using localStorage for privacy)
+// Secure session management with tokens
 const SESSION_KEY = 'whisper_session'
+const TOKEN_KEY = 'whisper_token'
+
+interface SecureSession {
+  user: PrivateUser
+  token: string
+  expires: number
+}
 
 export function saveSession(user: PrivateUser) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(user))
+  // Generate a secure session token
+  const token = generateSecureToken()
+  const expires = Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+  
+  const session: SecureSession = {
+    user,
+    token,
+    expires
+  }
+  
+  localStorage.setItem(SESSION_KEY, JSON.stringify(session))
 }
 
 export function getSession(): PrivateUser | null {
   try {
-    const session = localStorage.getItem(SESSION_KEY)
-    return session ? JSON.parse(session) : null
+    const sessionData = localStorage.getItem(SESSION_KEY)
+    if (!sessionData) return null
+    
+    const session: SecureSession = JSON.parse(sessionData)
+    
+    // Check if session is expired
+    if (Date.now() > session.expires) {
+      clearSession()
+      return null
+    }
+    
+    return session.user
   } catch {
     return null
   }
@@ -180,6 +207,12 @@ export function getSession(): PrivateUser | null {
 
 export function clearSession() {
   localStorage.removeItem(SESSION_KEY)
+}
+
+function generateSecureToken(): string {
+  const array = new Uint8Array(32)
+  crypto.getRandomValues(array)
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
 // Check if username is available

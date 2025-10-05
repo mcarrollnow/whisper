@@ -3,11 +3,14 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { getSession, clearSession, searchSignalUsers } from '@/lib/signal-auth'
 
 type User = {
   id: string
-  email: string
   username: string
+  display_name?: string
+  identity_key_public: string
+  registration_id: number
 }
 
 type Conversation = {
@@ -107,23 +110,15 @@ export default function MessagesPage() {
   }
 
   const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getSession()
     
     if (!user) {
-      router.push('/')
+      router.push('/auth')
       return
     }
 
-    const { data: profile } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single()
-
-    setCurrentUser(profile)
-    if (profile) {
-      loadConversations(user.id)
-    }
+    setCurrentUser(user)
+    loadConversations(user.id)
     setLoading(false)
   }
 
@@ -147,10 +142,10 @@ export default function MessagesPage() {
       if (msg.recipient_id !== userId) userIds.add(msg.recipient_id)
     })
 
-    // Fetch user details
+    // Fetch user details with Signal Protocol fields
     const { data: users } = await supabase
       .from('users')
-      .select('id, username, email')
+      .select('id, username, display_name, identity_key_public, registration_id')
       .in('id', Array.from(userIds))
 
     if (!users) return
@@ -163,7 +158,7 @@ export default function MessagesPage() {
       return {
         id: user.id,
         other_user: user,
-        last_message: lastMsg?.encrypted_content || 'Start chatting...',
+        last_message: lastMsg?.ciphertext || 'Start chatting...',
       }
     })
 
@@ -190,7 +185,7 @@ export default function MessagesPage() {
         const mappedMessages = data.map(msg => ({
           id: msg.id,
           sender_id: msg.sender_id,
-          content: msg.encrypted_content || '', // Ensure content is never null
+          content: msg.ciphertext || '', // Signal Protocol uses ciphertext field
           created_at: msg.created_at,
         }))
         setMessages(mappedMessages)
@@ -252,10 +247,15 @@ export default function MessagesPage() {
         payload: { user_id: currentUser.id, is_typing: false }
       })
 
+    // For now, store as plaintext ciphertext (will implement proper Signal Protocol encryption later)
     const { error } = await supabase.from('messages').insert({
       sender_id: currentUser.id,
       recipient_id: selectedConversation,
-      encrypted_content: newMessage, // Store as encrypted content
+      ciphertext: newMessage, // Signal Protocol field
+      mac: 'placeholder_mac', // Will implement proper MAC later
+      message_type: 'message',
+      message_counter: 1, // Will implement proper counter later
+      session_id: null // Will implement session management later
     })
 
     if (error) {
@@ -273,14 +273,12 @@ export default function MessagesPage() {
       return
     }
 
-    const { data } = await supabase
-      .from('users')
-      .select('id, username, email')
-      .ilike('username', `%${query}%`)
-      .neq('id', currentUser?.id || '')
-      .limit(10)
-
-    setSearchResults(data || [])
+    if (currentUser) {
+      const results = await searchSignalUsers(query, currentUser.id)
+      setSearchResults(results)
+    } else {
+      setSearchResults([])
+    }
   }
 
   const startConversation = (user: User) => {
@@ -393,7 +391,7 @@ export default function MessagesPage() {
                       className="w-full px-3 lg:px-4 py-2 lg:py-3 hover:bg-dark-surface text-left border-b border-dark-border last:border-b-0"
                     >
                       <div className="font-medium text-dark-text text-sm lg:text-base">{user.username}</div>
-                      <div className="text-xs lg:text-sm text-dark-text-secondary">{user.email}</div>
+                      <div className="text-xs lg:text-sm text-dark-text-secondary">{user.display_name || 'Anonymous User'}</div>
                     </button>
                   ))}
                 </div>
@@ -422,7 +420,7 @@ export default function MessagesPage() {
 
         <div className="flex-shrink-0 p-3 lg:p-4 border-t border-dark-border">
           <div className="font-medium text-dark-text text-sm lg:text-base">{currentUser?.username}</div>
-          <div className="text-xs lg:text-sm text-dark-text-secondary">{currentUser?.email}</div>
+          <div className="text-xs lg:text-sm text-dark-text-secondary">{currentUser?.display_name || 'Anonymous User'}</div>
         </div>
       </div>
 
