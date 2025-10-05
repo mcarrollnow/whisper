@@ -262,20 +262,37 @@ export async function saveSession(user: SignalUser) {
   const session: SignalSession = { user, token, expires }
   localStorage.setItem(SESSION_KEY, JSON.stringify(session))
 
-  // Also create Supabase auth session for realtime to work
+  // Create a real Supabase auth user for realtime to work
   try {
     console.log('🔐 Creating Supabase auth session for realtime...')
-    const { data, error } = await supabase.auth.signInAnonymously()
 
-    if (error) {
-      console.error('❌ Failed to create Supabase auth session:', error)
+    // Use the Signal user ID as email + password for Supabase auth
+    const fakeEmail = `${user.id}@signal.local`
+    const fakePassword = token // Use the session token as password
+
+    // Try to sign in first, if fails then sign up
+    let authResult = await supabase.auth.signInWithPassword({
+      email: fakeEmail,
+      password: fakePassword
+    })
+
+    if (authResult.error) {
+      // User doesn't exist, create it
+      authResult = await supabase.auth.signUp({
+        email: fakeEmail,
+        password: fakePassword
+      })
+    }
+
+    if (authResult.error) {
+      console.error('❌ Failed to create Supabase auth session:', authResult.error)
     } else {
-      console.log('✅ Supabase auth session created:', data.session?.access_token ? 'Token exists' : 'No token')
+      console.log('✅ Supabase auth session created:', authResult.data.session?.access_token ? 'Token exists' : 'No token')
 
-      // Store mapping between Supabase auth user and Signal user
-      if (data.user) {
+      // Store mapping
+      if (authResult.data.user) {
         await supabase.from('auth_mapping').upsert({
-          supabase_user_id: data.user.id,
+          supabase_user_id: authResult.data.user.id,
           signal_user_id: user.id
         })
         console.log('✅ Auth mapping created')
