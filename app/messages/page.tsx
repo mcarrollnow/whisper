@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { getSession, clearSession, searchSignalUsers } from '@/lib/signal-auth'
+import { createSession, getSession as getSignalSession, updateSession, encryptMessage, decryptMessage } from '@/lib/signal-session'
 
 type User = {
   id: string
@@ -77,11 +78,26 @@ export default function MessagesPage() {
           table: 'messages',
           filter: `or(and(sender_id.eq.${currentUser.id},recipient_id.eq.${selectedConversation}),and(sender_id.eq.${selectedConversation},recipient_id.eq.${currentUser.id}))`
         },
-        (payload) => {
+        async (payload) => {
+          let content = payload.new.ciphertext || ''
+          
+          // Try to decrypt real-time message
+          if (payload.new.session_id && payload.new.mac && currentUser) {
+            const session = await getSignalSession(currentUser.id, selectedConversation!)
+            if (session && session.chain_key_recv) {
+              const decrypted = decryptMessage(payload.new.ciphertext, payload.new.mac, session.chain_key_recv)
+              if (decrypted) {
+                content = decrypted.message
+                // Update session with new chain key
+                await updateSession(session.id, { chain_key_recv: decrypted.newChainKey })
+              }
+            }
+          }
+          
           const newMessage = {
             id: payload.new.id,
             sender_id: payload.new.sender_id,
-            content: payload.new.encrypted_content || '',
+            content,
             created_at: payload.new.created_at,
           }
           setMessages(prev => [...prev, newMessage])
@@ -182,11 +198,28 @@ export default function MessagesPage() {
       }
 
       if (data && Array.isArray(data)) {
-        const mappedMessages = data.map(msg => ({
-          id: msg.id,
-          sender_id: msg.sender_id,
-          content: msg.ciphertext || '', // Signal Protocol uses ciphertext field
-          created_at: msg.created_at,
+        const mappedMessages = await Promise.all(data.map(async (msg) => {
+          let content = msg.ciphertext || ''
+          
+          // Try to decrypt message if we have a session
+          if (msg.session_id && msg.mac) {
+            const session = await getSignalSession(currentUser.id, otherUserId)
+            if (session && session.chain_key_recv) {
+              const decrypted = decryptMessage(msg.ciphertext, msg.mac, session.chain_key_recv)
+              if (decrypted) {
+                content = decrypted.message
+                // Update session with new chain key
+                await updateSession(session.id, { chain_key_recv: decrypted.newChainKey })
+              }
+            }
+          }
+          
+          return {
+            id: msg.id,
+            sender_id: msg.sender_id,
+            content,
+            created_at: msg.created_at,
+          }
         }))
         setMessages(mappedMessages)
       } else {
@@ -247,21 +280,54 @@ export default function MessagesPage() {
         payload: { user_id: currentUser.id, is_typing: false }
       })
 
-    // For now, store as plaintext ciphertext (will implement proper Signal Protocol encryption later)
+    // Get or create Signal Protocol session
+    let session = await getSignalSession(currentUser.id, selectedConversation)
+    if (!session) {
+      // Create new session with shared secret (simplified - should use X3DH)
+      const sharedSecret = 'temp_shared_secret_' + Date.now()
+      session = await createSession(currentUser.id, selectedConversation, sharedSecret)
+      if (!session) {
+        console.error('Failed to create session')
+        return
+      }
+    }
+
+    // Encrypt message using Signal Protocol
+    let ciphertext = newMessage
+    let mac = 'no_encryption'
+    let newChainKey = session.chain_key_send
+
+    if (session.chain_key_send) {
+      const encrypted = encryptMessage(newMessage, session.chain_key_send)
+      ciphertext = encrypted.ciphertext
+      mac = encrypted.mac
+      newChainKey = encrypted.newChainKey
+    } else {
+      // Initialize chain key if not exists
+      newChainKey = 'initial_chain_key_' + Date.now()
+    }
+
+    // Send encrypted message
     const { error } = await supabase.from('messages').insert({
       sender_id: currentUser.id,
       recipient_id: selectedConversation,
-      ciphertext: newMessage, // Signal Protocol field
-      mac: 'placeholder_mac', // Will implement proper MAC later
+      session_id: session.id,
+      ciphertext,
+      mac,
       message_type: 'message',
-      message_counter: 1, // Will implement proper counter later
-      session_id: null // Will implement session management later
+      message_counter: session.send_counter + 1
     })
 
     if (error) {
       console.error('Error sending message:', error)
       return
     }
+
+    // Update session state
+    await updateSession(session.id, {
+      chain_key_send: newChainKey,
+      send_counter: session.send_counter + 1
+    })
 
     setNewMessage('')
     // Don't reload messages - real-time subscription will handle it
