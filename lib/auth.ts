@@ -7,7 +7,6 @@ export interface PrivateUser {
   username: string
   display_name?: string
   created_at: string
-  last_seen: string
 }
 
 export interface AuthResult {
@@ -57,7 +56,7 @@ export async function createAccount(password: string, displayName?: string): Pro
         display_name: displayName || null,
         password_hash: passwordHash
       })
-      .select('id, username, display_name, created_at, last_seen')
+      .select('id, username, display_name, created_at')
       .single()
     
     if (error) {
@@ -76,7 +75,7 @@ export async function loginWithUsername(username: string, password: string): Pro
     // Get user by username
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, username, display_name, password_hash, created_at, last_seen')
+      .select('id, username, display_name, password_hash, created_at')
       .eq('username', username)
       .single()
     
@@ -91,10 +90,10 @@ export async function loginWithUsername(username: string, password: string): Pro
       return { error: 'Invalid username or password' }
     }
     
-    // Update last seen
+    // Update updated_at timestamp
     await supabase
       .from('users')
-      .update({ last_seen: new Date().toISOString() })
+      .update({ updated_at: new Date().toISOString() })
       .eq('id', user.id)
     
     // Return user without password hash
@@ -110,7 +109,7 @@ export async function searchUsersByUsername(query: string, currentUserId: string
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, username, display_name, created_at, last_seen')
+      .select('id, username, display_name, created_at')
       .ilike('username', `%${query}%`)
       .neq('id', currentUserId)
       .limit(10)
@@ -132,7 +131,7 @@ export async function getUserById(userId: string): Promise<PrivateUser | null> {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('id, username, display_name, created_at, last_seen')
+      .select('id, username, display_name, created_at')
       .eq('id', userId)
       .single()
     

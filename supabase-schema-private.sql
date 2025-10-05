@@ -1,6 +1,13 @@
 -- Privacy-focused schema for anonymous messaging
 -- Removes email requirements and implements Signal-like privacy
 
+-- Clean up any existing objects first
+DROP TRIGGER IF EXISTS update_users_updated_at ON users;
+DROP TRIGGER IF EXISTS update_users_last_seen ON users;
+DROP FUNCTION IF EXISTS update_updated_at_column();
+DROP FUNCTION IF EXISTS update_last_seen();
+DROP FUNCTION IF EXISTS generate_anonymous_username();
+
 -- Drop existing tables if recreating
 DROP TABLE IF EXISTS messages CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
@@ -85,8 +92,14 @@ CREATE INDEX messages_created_at_idx ON messages(created_at DESC);
 CREATE INDEX user_keys_user_id_idx ON user_keys(user_id);
 CREATE INDEX user_keys_type_idx ON user_keys(key_type);
 
--- Enable realtime
-ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+-- Enable realtime (add messages table to realtime publication)
+-- Note: Run this separately if it fails: ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+  END IF;
+END $$;
 
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
