@@ -613,7 +613,7 @@ export default function MessagesPage() {
               <p className="text-sm lg:text-base">Select a contact to start messaging</p>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Invite Code Modal */}
