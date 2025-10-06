@@ -60,27 +60,27 @@ export default function PrivateAuthPage() {
   }
 
   return (
-    <div className="h-screen bg-dark-bg flex items-center justify-center p-4 overflow-hidden">
-      <div className="w-full max-w-md max-h-full overflow-y-auto">
-        {/* Logo/Header */}
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center">
-            <img 
-              src="/logo.png" 
-              alt="Whisper Logo" 
-              className="w-16 h-16 object-contain"
+    <div className="min-h-screen bg-dark-bg flex items-center justify-center p-4 overflow-hidden">
+      <div className="w-full max-w-md">
+        {/* Logo/Header - Signal Style */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+            <img
+              src="/logo.png"
+              alt="Whisper Logo"
+              className="w-20 h-20 object-contain"
             />
           </div>
-          <h1 className="text-2xl font-bold text-dark-text mb-2">Whisper</h1>
-          <p className="text-dark-text-secondary text-sm">Anonymous • Private • Secure</p>
+          <h1 className="text-3xl font-semibold text-dark-text mb-2">Whisper</h1>
+          <p className="text-dark-text-secondary text-base">Anonymous • Private • Secure</p>
         </div>
 
-        {/* Auth Form */}
-        <div className="bg-dark-surface rounded-2xl p-6 border border-dark-border shadow-2xl">
-          <div className="flex gap-2 mb-4">
+        {/* Auth Form - Signal Style */}
+        <div className="bg-dark-surface rounded-2xl p-8 shadow-2xl">
+          <div className="flex gap-2 mb-6">
             <button
               onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2 rounded-lg font-medium text-sm transition-colors ${
+              className={`flex-1 py-3 rounded-xl font-medium text-base transition-all ${
                 isLogin
                   ? 'bg-accent-primary text-white'
                   : 'bg-dark-elevated text-dark-text-secondary hover:text-dark-text'
@@ -90,7 +90,7 @@ export default function PrivateAuthPage() {
             </button>
             <button
               onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2 rounded-lg font-medium text-sm transition-colors ${
+              className={`flex-1 py-3 rounded-xl font-medium text-base transition-all ${
                 !isLogin
                   ? 'bg-accent-primary text-white'
                   : 'bg-dark-elevated text-dark-text-secondary hover:text-dark-text'
@@ -101,16 +101,16 @@ export default function PrivateAuthPage() {
           </div>
 
           {error && (
-            <div className="mb-3 p-2 bg-accent-error/10 border border-accent-error/20 rounded-lg text-accent-error text-xs">
+            <div className="mb-4 p-3 bg-accent-error/10 border border-accent-error/30 rounded-xl text-accent-error text-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleAuth} className="space-y-3">
+          <form onSubmit={handleAuth} className="space-y-4">
             {!isLogin && (
               <>
                 <div>
-                  <label className="block text-dark-text text-xs font-medium mb-1">
+                  <label className="block text-dark-text text-sm font-medium mb-2">
                     Anonymous Username
                   </label>
                   <div className="flex gap-2">
@@ -118,34 +118,36 @@ export default function PrivateAuthPage() {
                       type="text"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
-                      className="flex-1 px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text text-sm placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
+                      className="flex-1 px-4 py-3 bg-dark-elevated border border-dark-border rounded-xl text-dark-text text-base placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
                       placeholder="@whisper.42"
                       required={!isLogin}
                       readOnly={!!generatedUsername}
+                      style={{ fontSize: '16px' }}
                     />
                     <button
                       type="button"
                       onClick={handleGenerateUsername}
-                      className="px-3 py-2 bg-accent-primary text-white rounded-lg hover:bg-blue-600 text-xs font-medium"
+                      className="px-4 py-3 bg-accent-primary text-white rounded-xl hover:bg-accent-primary-hover text-sm font-medium transition-colors"
                     >
                       Generate
                     </button>
                   </div>
-                  <p className="text-xs text-dark-text-secondary mt-1">
+                  <p className="text-sm text-dark-text-secondary mt-2">
                     Your anonymous username - no personal info required
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-dark-text text-xs font-medium mb-1">
+                  <label className="block text-dark-text text-sm font-medium mb-2">
                     Display Name (Optional)
                   </label>
                   <input
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text text-sm placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
+                    className="w-full px-4 py-3 bg-dark-elevated border border-dark-border rounded-xl text-dark-text text-base placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
                     placeholder="How others see you (optional)"
+                    style={{ fontSize: '16px' }}
                   />
                 </div>
               </>
@@ -153,35 +155,37 @@ export default function PrivateAuthPage() {
 
             {isLogin && (
               <div>
-                <label className="block text-dark-text text-xs font-medium mb-1">
+                <label className="block text-dark-text text-sm font-medium mb-2">
                   Username
                 </label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text text-sm placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
+                  className="w-full px-4 py-3 bg-dark-elevated border border-dark-border rounded-xl text-dark-text text-base placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
                   placeholder="@whisper.42"
                   required
+                  style={{ fontSize: '16px' }}
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-dark-text text-xs font-medium mb-1">
+              <label className="block text-dark-text text-sm font-medium mb-2">
                 Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text text-sm placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
+                className="w-full px-4 py-3 bg-dark-elevated border border-dark-border rounded-xl text-dark-text text-base placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
                 placeholder="••••••••"
                 required
                 minLength={8}
+                style={{ fontSize: '16px' }}
               />
               {!isLogin && (
-                <p className="text-xs text-dark-text-secondary mt-1">
+                <p className="text-sm text-dark-text-secondary mt-2">
                   Minimum 8 characters
                 </p>
               )}
@@ -190,17 +194,17 @@ export default function PrivateAuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 bg-accent-primary text-white rounded-lg font-medium text-sm hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full py-3.5 bg-accent-primary text-white rounded-xl font-medium text-base hover:bg-accent-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-6"
             >
               {loading ? 'Please wait...' : isLogin ? 'Login' : 'Create Account'}
             </button>
           </form>
 
-          <div className="mt-4 text-center text-xs text-dark-text-secondary">
-            <div className="space-y-1">
-              <p><strong>Zero Knowledge:</strong> No email, phone, or personal data</p>
-              <p><strong>Anonymous:</strong> Auto-generated usernames</p>
-              <p><strong>Encrypted:</strong> End-to-end Signal Protocol</p>
+          <div className="mt-6 text-center text-sm text-dark-text-secondary border-t border-dark-border pt-6">
+            <div className="space-y-2">
+              <p><strong className="text-dark-text">Zero Knowledge:</strong> No email, phone, or personal data</p>
+              <p><strong className="text-dark-text">Anonymous:</strong> Auto-generated usernames</p>
+              <p><strong className="text-dark-text">Encrypted:</strong> End-to-end Signal Protocol</p>
             </div>
           </div>
         </div>

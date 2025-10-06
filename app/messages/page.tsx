@@ -520,7 +520,7 @@ export default function MessagesPage() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Signal Style */}
       <div className={`
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0
@@ -530,48 +530,48 @@ export default function MessagesPage() {
         border-r border-dark-border
         flex flex-col
         z-50 lg:z-auto
-        transition-transform duration-300 ease-in-out
+        transition-transform duration-200 ease-in-out
         h-full lg:h-auto
         inset-y-0 lg:inset-y-auto
       `}>
-        <div className="flex-shrink-0 p-3 lg:p-4 border-b border-dark-border">
-          <div className="flex items-center justify-between mb-3 lg:mb-4">
-            <div className="flex items-center gap-2">
-              <img 
-                src="/logo.png" 
-                alt="Whisper Logo" 
-                className="w-6 h-6 lg:w-7 lg:h-7 object-contain"
+        <div className="flex-shrink-0 p-4 lg:p-5 border-b border-dark-border">
+          <div className="flex items-center justify-between mb-4 lg:mb-5">
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.png"
+                alt="Whisper Logo"
+                className="w-8 h-8 lg:w-9 lg:h-9 object-contain"
               />
-              <h1 className="text-lg lg:text-xl font-bold text-dark-text">Whisper</h1>
+              <h1 className="text-xl lg:text-2xl font-semibold text-dark-text">Whisper</h1>
             </div>
-            <div className="flex items-center gap-1 lg:gap-2">
-              <button 
-                onClick={() => setSidebarOpen(false)} 
-                className="p-2 hover:bg-dark-elevated rounded-lg lg:hidden"
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2.5 hover:bg-dark-elevated rounded-lg lg:hidden transition-colors"
               >
-                <svg className="w-4 h-4 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <button onClick={logout} className="p-2 hover:bg-dark-elevated rounded-lg">
-                <svg className="w-4 h-4 lg:w-5 lg:h-5 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button onClick={logout} className="p-2.5 hover:bg-dark-elevated rounded-lg transition-colors">
+                <svg className="w-5 h-5 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
               </button>
             </div>
           </div>
-          
-          <div className="space-y-2">
+
+          <div className="space-y-2.5">
             <button
               onClick={generateMyInviteCode}
-              className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-accent-primary text-white rounded-lg hover:bg-blue-600 font-medium text-sm lg:text-base"
+              className="w-full px-4 py-3 bg-accent-primary text-white rounded-xl hover:bg-accent-primary-hover font-medium text-base transition-colors"
             >
               Share Invite Code
             </button>
-            
+
             <button
               onClick={() => setShowAddContactModal(true)}
-              className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-dark-elevated border border-dark-border text-dark-text rounded-lg hover:bg-dark-surface font-medium text-sm lg:text-base"
+              className="w-full px-4 py-3 bg-dark-elevated text-dark-text rounded-xl hover:bg-dark-border font-medium text-base transition-colors"
             >
               Add Contact
             </button>
@@ -609,12 +609,22 @@ export default function MessagesPage() {
                 setSelectedConversation(conv.id)
                 setSidebarOpen(false) // Close sidebar on mobile
               }}
-              className={`w-full px-3 lg:px-4 py-3 lg:py-4 border-b border-dark-border hover:bg-dark-elevated text-left transition-colors ${
+              className={`w-full px-4 py-4 flex items-center gap-3 hover:bg-dark-elevated text-left transition-colors ${
                 selectedConversation === conv.id ? 'bg-dark-elevated' : ''
               }`}
             >
-              <div className="font-medium text-dark-text text-sm lg:text-base mb-1">{conv.other_user.username}</div>
-              <div className="text-xs lg:text-sm text-dark-text-secondary truncate">{conv.last_message}</div>
+              {/* Signal-style Avatar */}
+              <div className="flex-shrink-0 w-12 h-12 bg-accent-primary rounded-full flex items-center justify-center">
+                <span className="text-white font-semibold text-lg">
+                  {conv.other_user.username?.[0]?.toUpperCase() || 'U'}
+                </span>
+              </div>
+
+              {/* Message Content */}
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-dark-text text-base mb-0.5">{conv.other_user.username}</div>
+                <div className="text-sm text-dark-text-secondary truncate">{conv.last_message}</div>
+              </div>
             </button>
           ))}
         </div>
@@ -629,32 +639,32 @@ export default function MessagesPage() {
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
         {selectedConversation ? (
           <>
-            {/* Chat Header */}
-            <div className="flex-shrink-0 p-3 lg:p-4 border-b border-dark-border bg-dark-surface flex items-center">
+            {/* Chat Header - Signal Style */}
+            <div className="flex-shrink-0 px-4 py-3 lg:px-5 lg:py-4 border-b border-dark-border bg-dark-surface flex items-center">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="p-2 hover:bg-dark-elevated rounded-lg mr-2 lg:hidden"
+                className="p-2.5 hover:bg-dark-elevated rounded-lg mr-2 lg:hidden transition-colors"
               >
-                <svg className="w-4 h-4 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-dark-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <div className="flex items-center">
-                <div className="w-7 h-7 lg:w-8 lg:h-8 bg-accent-primary rounded-full flex items-center justify-center mr-2 lg:mr-3">
-                  <span className="text-white font-medium text-xs lg:text-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 lg:w-10 lg:h-10 bg-accent-primary rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-semibold text-base lg:text-lg">
                     {conversations.find(c => c.id === selectedConversation)?.other_user.username?.[0]?.toUpperCase()}
                   </span>
                 </div>
-                <div className="font-medium text-dark-text text-sm lg:text-base">
+                <div className="font-semibold text-dark-text text-base lg:text-lg">
                   {conversations.find(c => c.id === selectedConversation)?.other_user.username}
                 </div>
               </div>
             </div>
 
             {/* Messages - Full height, scrollable behind input */}
-            <div className="absolute inset-0 top-[57px] lg:top-[65px] overflow-y-auto overflow-x-hidden p-3 lg:p-4 pb-[80px] lg:pb-[88px] space-y-2 lg:space-y-3 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div className="absolute inset-0 top-[57px] lg:top-[65px] overflow-y-auto overflow-x-hidden p-4 lg:p-6 pb-[80px] lg:pb-[88px] space-y-2 scrollbar-thin scrollbar-thumb-dark-border scrollbar-track-transparent" style={{ WebkitOverflowScrolling: 'touch' }}>
               {messages.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-dark-text-secondary text-sm">
+                <div className="flex items-center justify-center h-full text-dark-text-secondary text-base">
                   No messages yet. Start the conversation!
                 </div>
               ) : (
@@ -664,10 +674,10 @@ export default function MessagesPage() {
                     className={`flex ${msg.sender_id === currentUser?.id ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[75%] sm:max-w-xs lg:max-w-md xl:max-w-lg px-3 lg:px-4 py-2 lg:py-3 rounded-2xl text-sm lg:text-base break-words ${
+                      className={`max-w-[75%] sm:max-w-md lg:max-w-lg px-4 py-2.5 rounded-signal text-base break-words ${
                         msg.sender_id === currentUser?.id
-                          ? 'bg-accent-primary text-white'
-                          : 'bg-dark-elevated text-dark-text'
+                          ? 'bg-accent-outgoing text-white rounded-br-md'
+                          : 'bg-accent-incoming text-dark-text rounded-bl-md'
                       }`}
                     >
                       {msg.content || '[Empty message]'}
@@ -679,14 +689,11 @@ export default function MessagesPage() {
               {/* Typing Indicator */}
               {typingUsers.size > 0 && (
                 <div className="flex justify-start">
-                  <div className="bg-dark-elevated text-dark-text px-3 lg:px-4 py-2 lg:py-3 rounded-2xl text-sm lg:text-base">
-                    <div className="flex items-center space-x-1">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-dark-text-secondary rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-dark-text-secondary rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                        <div className="w-2 h-2 bg-dark-text-secondary rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                      </div>
-                      <span className="text-dark-text-secondary text-xs ml-2">typing...</span>
+                  <div className="bg-accent-incoming text-dark-text-secondary px-4 py-3 rounded-signal rounded-bl-md">
+                    <div className="flex space-x-1.5">
+                      <div className="w-2 h-2 bg-dark-text-secondary rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-dark-text-secondary rounded-full animate-bounce" style={{animationDelay: '0.15s'}}></div>
+                      <div className="w-2 h-2 bg-dark-text-secondary rounded-full animate-bounce" style={{animationDelay: '0.3s'}}></div>
                     </div>
                   </div>
                 </div>
@@ -696,9 +703,9 @@ export default function MessagesPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Message Input - Floating attached to keyboard */}
-            <div className="fixed bottom-0 left-0 right-0 lg:left-80 xl:left-96 p-3 lg:p-4 border-t border-dark-border bg-dark-surface z-20">
-              <form onSubmit={sendMessage} className="flex gap-2">
+            {/* Message Input - Signal Style */}
+            <div className="fixed bottom-0 left-0 right-0 lg:left-80 xl:left-96 p-4 lg:p-5 border-t border-dark-border bg-dark-surface z-20">
+              <form onSubmit={sendMessage} className="flex gap-3 items-end">
                 <textarea
                   value={newMessage}
                   onChange={(e) => {
@@ -732,76 +739,79 @@ export default function MessagesPage() {
                       }
                     }, 100)
                   }}
-                  placeholder="Type a message..."
+                  placeholder="Message"
                   rows={1}
-                  className="flex-1 px-3 lg:px-4 py-2.5 lg:py-3 bg-dark-elevated border border-dark-border rounded-2xl text-dark-text text-base focus:outline-none focus:ring-2 focus:ring-accent-primary resize-none overflow-y-auto max-h-32"
+                  className="flex-1 px-4 py-3 bg-dark-elevated border border-dark-border rounded-signal text-dark-text text-base placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary resize-none overflow-y-auto max-h-32 transition-colors"
                   style={{ fontSize: '16px' }}
                 />
                 <button
                   type="submit"
-                  className="px-5 lg:px-6 py-2.5 lg:py-3 bg-accent-primary text-white rounded-full hover:bg-blue-600 font-medium text-base whitespace-nowrap flex-shrink-0 self-end"
-                  style={{ fontSize: '16px' }}
+                  disabled={!newMessage.trim()}
+                  className="w-11 h-11 bg-accent-primary text-white rounded-full hover:bg-accent-primary-hover font-medium flex items-center justify-center flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  Send
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
                 </button>
               </form>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-dark-text-secondary p-6">
-            <button 
+          <div className="flex-1 flex flex-col items-center justify-center text-dark-text-secondary p-6 bg-dark-bg">
+            <button
               onClick={() => setSidebarOpen(true)}
-              className="mb-6 p-4 bg-accent-primary text-white rounded-full hover:bg-blue-600 lg:hidden shadow-lg"
+              className="mb-8 p-4 bg-accent-primary text-white rounded-full hover:bg-accent-primary-hover lg:hidden shadow-lg transition-all"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <div className="text-center">
-              <div className="mb-4 lg:mb-6">
-                <img 
-                  src="/logo.png" 
-                  alt="Whisper Logo" 
-                  className="w-16 h-16 lg:w-20 lg:h-20 mx-auto object-contain opacity-50"
+              <div className="mb-6">
+                <img
+                  src="/logo.png"
+                  alt="Whisper Logo"
+                  className="w-20 h-20 lg:w-24 lg:h-24 mx-auto object-contain opacity-40"
                 />
               </div>
-              <p className="text-sm lg:text-base">Select a contact to start messaging</p>
+              <p className="text-base lg:text-lg font-medium text-dark-text-secondary">Select a contact to start messaging</p>
+              <p className="text-sm text-dark-text-secondary mt-2 opacity-75">Your conversations will appear here</p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Invite Code Modal */}
+      {/* Invite Code Modal - Signal Style */}
       {showInviteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-dark-surface rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-dark-text font-bold text-lg mb-4">Share Your Invite Code</h2>
-            <p className="text-dark-text-secondary text-sm mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-dark-surface rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <h2 className="text-dark-text font-semibold text-xl mb-3">Share Your Invite Code</h2>
+            <p className="text-dark-text-secondary text-base mb-5">
               Share this code with someone to add them as a contact. Code expires in 24 hours.
             </p>
-            <div className="bg-dark-elevated p-4 rounded-lg mb-4">
+            <div className="bg-dark-elevated p-5 rounded-xl mb-5">
               <div className="text-center">
-                <div className="text-2xl font-mono font-bold text-accent-primary mb-2">
+                <div className="text-3xl font-mono font-bold text-accent-primary mb-3 tracking-wider">
                   {currentInviteCode}
                 </div>
                 <button
                   onClick={() => navigator.clipboard.writeText(currentInviteCode)}
-                  className="text-dark-text-secondary hover:text-dark-text text-sm"
+                  className="text-dark-text-secondary hover:text-dark-text text-sm transition-colors"
                 >
-                  Click to copy
+                  Tap to copy
                 </button>
               </div>
             </div>
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowInviteModal(false)}
-                className="flex-1 px-4 py-2 bg-dark-elevated text-dark-text rounded-lg hover:bg-dark-border"
+                className="flex-1 px-4 py-3 bg-dark-elevated text-dark-text rounded-xl hover:bg-dark-border font-medium transition-colors"
               >
                 Close
               </button>
               <button
                 onClick={() => navigator.clipboard.writeText(currentInviteCode)}
-                className="flex-1 px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-blue-600"
+                className="flex-1 px-4 py-3 bg-accent-primary text-white rounded-xl hover:bg-accent-primary-hover font-medium transition-colors"
               >
                 Copy Code
               </button>
@@ -810,21 +820,22 @@ export default function MessagesPage() {
         </div>
       )}
 
-      {/* Add Contact Modal */}
+      {/* Add Contact Modal - Signal Style */}
       {showAddContactModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-dark-surface rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-dark-text font-bold text-lg mb-4">Add Contact</h2>
-            <p className="text-dark-text-secondary text-sm mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-dark-surface rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <h2 className="text-dark-text font-semibold text-xl mb-3">Add Contact</h2>
+            <p className="text-dark-text-secondary text-base mb-5">
               Enter the invite code someone shared with you to add them as a contact.
             </p>
             <input
               type="text"
               value={addContactCode}
               onChange={(e) => setAddContactCode(e.target.value.toUpperCase())}
-              placeholder="Enter invite code..."
-              className="w-full px-4 py-3 bg-dark-elevated border border-dark-border rounded-lg text-dark-text mb-4 font-mono text-center text-lg"
+              placeholder="ENTER CODE"
+              className="w-full px-4 py-3.5 bg-dark-elevated border border-dark-border rounded-xl text-dark-text mb-5 font-mono text-center text-xl font-semibold tracking-wider placeholder-dark-text-secondary focus:outline-none focus:border-accent-primary transition-colors"
               maxLength={8}
+              style={{ fontSize: '20px' }}
             />
             <div className="flex space-x-3">
               <button
@@ -832,14 +843,14 @@ export default function MessagesPage() {
                   setShowAddContactModal(false)
                   setAddContactCode('')
                 }}
-                className="flex-1 px-4 py-2 bg-dark-elevated text-dark-text rounded-lg hover:bg-dark-border"
+                className="flex-1 px-4 py-3 bg-dark-elevated text-dark-text rounded-xl hover:bg-dark-border font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddContact}
                 disabled={!addContactCode.trim()}
-                className="flex-1 px-4 py-2 bg-accent-primary text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-3 bg-accent-primary text-white rounded-xl hover:bg-accent-primary-hover font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Add Contact
               </button>
