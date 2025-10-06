@@ -713,9 +713,21 @@ export default function MessagesPage() {
                     handleTyping()
                   }}
                   onKeyDown={(e) => {
-                    // Prevent form submission on Enter
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault()
+                    if (e.key === 'Enter') {
+                      // Check if device is mobile (touch-enabled)
+                      const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+
+                      if (isMobile) {
+                        // On mobile: Enter creates new line (default behavior)
+                        return
+                      } else {
+                        // On desktop: Enter sends (unless Shift is held)
+                        if (!e.shiftKey) {
+                          e.preventDefault()
+                          sendMessage(e)
+                        }
+                        // Shift+Enter creates new line (default behavior)
+                      }
                     }
                   }}
                   onFocus={() => {
