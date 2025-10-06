@@ -169,7 +169,7 @@ export default function MessagesPage() {
 
     // Subscribe to typing indicators
     const typingChannel = supabase
-      .channel(`typing-${selectedConversation}-${Date.now()}`)
+      .channel(`typing-${selectedConversation}`)
       .on('broadcast', { event: 'typing' }, (payload) => {
         const { user_id, is_typing } = payload.payload
         if (user_id !== currentUser.id) {
